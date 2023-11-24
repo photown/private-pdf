@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { PdfDocument } from './PdfDocument.js';
+import { PdfDocument } from './PdfDocument';
 
 
 export class PdfDocumentLoader {

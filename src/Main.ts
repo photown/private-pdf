@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
- import { PdfDocumentLoader } from './PdfDocumentLoader.js';
- import { PdfDocument } from './PdfDocument.js';
- import { PdfPage } from './PdfPage.js';
+ import { PdfDocumentLoader } from './PdfDocumentLoader';
+ import { PdfDocument } from './PdfDocument';
+ import { PdfPage } from './PdfPage';
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =

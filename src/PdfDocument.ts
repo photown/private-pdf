@@ -1,7 +1,7 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import { EventBus } from 'pdfjs-dist/web/pdf_viewer';
 
-import { PdfPage } from './PdfPage.js';
+import { PdfPage } from './PdfPage';
 
 export class PdfDocument {
   constructor(private readonly pdfDocumentProxy: pdfjsLib.PDFDocumentProxy) {}
