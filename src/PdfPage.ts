@@ -18,4 +18,21 @@ export class PdfPage {
     pdfPageView.setPdfPage(this.pdfPageProxy);
     pdfPageView.draw();
   }
+
+  public async renderThumbnail(canvas: HTMLCanvasElement, maxSizePx: number) {
+    const defaultViewPort = this.pdfPageProxy.getViewport({ scale: 1 })
+    if (defaultViewPort.width > defaultViewPort.height) {
+      canvas.width = maxSizePx;
+      canvas.height = maxSizePx * defaultViewPort.height / defaultViewPort.width;
+    } else {
+      canvas.width = maxSizePx * defaultViewPort.width / defaultViewPort.height;
+      canvas.height = maxSizePx;
+    }
+    const scale = Math.min(canvas.width / defaultViewPort.width, canvas.height / defaultViewPort.height);
+    if (canvas.getContext("2d") != null) {
+      const context2d: CanvasRenderingContext2D = canvas.getContext("2d") as CanvasRenderingContext2D
+      return this.pdfPageProxy
+          .render({canvasContext: context2d, viewport: this.pdfPageProxy.getViewport({scale: scale})});
+    }
+  }
 }

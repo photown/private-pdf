@@ -3,11 +3,13 @@ import { PdfDocument } from './PdfDocument';
 
 
 export class PdfDocumentLoader {
-  constructor(private readonly url: string, private readonly options: PdfOptions) {}
+  constructor(private readonly fileData: ArrayBuffer, private readonly options: PdfOptions) {}
 
   public async load(): Promise<PdfDocument> {
-    const loadingTask = pdfjsLib.getDocument({
-      url: this.url,
+    const loadingTask = pdfjsLib.getDocument(
+    {
+      data: this.fileData,
+      //url: this.url,
       cMapUrl: this.options.cMapUrl,
       cMapPacked: this.options.cMapPacked,
       enableXfa: this.options.enableXfa,

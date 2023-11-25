@@ -22,10 +22,49 @@ limitations under the License.
   <title>PDF.js page viewer using built components</title>
 
   <style>
+    :root {
+      --toolbar-height: 45px;
+    }
     body {
       background-color: #808080;
       margin: 0;
       padding: 0;
+    }
+    #flex-container {
+      display: flex;
+    }
+    #toolbar {
+      height: var(--toolbar-height);
+    }
+    #pages {
+      display: flex;
+      width: 210px;
+      max-height: calc(100vh - var(--toolbar-height));
+      overflow-y: auto;
+      flex-direction: column;
+      align-items: center;
+    }
+    #content {
+      max-height: calc(100vh - var(--toolbar-height));;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    #pages > img {
+      width: 200px;
+    }
+    #pages .page-list-label {
+      text-align: center;
+    }
+    #pages .page-list-container {
+      padding: 25px;
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+    }
+    .page-list-container-selected {
+      background-color: #a6a6c7;
     }
   </style>
 
@@ -33,12 +72,20 @@ limitations under the License.
 </head>
 
 <body>
-  <div>
+  <div id="toolbar">
     <button id="previous">Previous</button>
     <button id="next">Next</button>
     <input type="file" accept=".pdf" id="pdf_file" name="pdf_file">
+    <button id="select">Select</button>
+    <button id="save">Save</button>
+  </div>   
+  <div id="flex-container">
+      <div id="pages"></div>
+      
+      <div id="content">   
+          <div id="pageContainer" class="pdfViewer singlePageView"></div>
+      </div>
   </div>
-  <div id="pageContainer" class="pdfViewer singlePageView"></div>
 
   <script src="dist/bundle.js" type="module"></script>
 </body>
