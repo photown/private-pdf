@@ -5,6 +5,7 @@
   "main": "build/Main.js",
   "dependencies": {
     "path": "^0.12.7",
+    "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^3.11.174"
   },
   "scripts": {

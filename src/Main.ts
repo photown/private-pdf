@@ -3,6 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
  import { PdfDocumentLoader } from './PdfDocumentLoader';
  import { PdfDocument } from './PdfDocument';
  import { PdfPage } from './PdfPage';
+ import { KeyValuePairs } from './CommonTypes';
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -23,6 +24,7 @@ const container: HTMLDivElement = document.getElementById("pageContainer") as HT
 const pageListContainer: HTMLDivElement = document.getElementById("pages") as HTMLDivElement;
 
 var currentPage = 1;
+var inputNameToValueMap: KeyValuePairs = {};
 
 (document.getElementById("select") as HTMLElement).onclick = async function() {
   const input = document.getElementById("pdf_file") as HTMLInputElement
@@ -35,10 +37,29 @@ var currentPage = 1;
   }
 };
 
-//loadPdf(DEFAULT_URL)
+downloadAndLoadPdf(DEFAULT_URL);
+
+function downloadAndLoadPdf(url: string) {
+  fetch(url)
+      .then(response => {
+          if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.arrayBuffer();
+      })
+      .then(arrayBuffer => {
+          // The arrayBuffer contains the file data
+          console.log("File downloaded successfully:", arrayBuffer);
+          loadPdf(arrayBuffer);
+      })
+      .catch(error => {
+          console.error("Error downloading file:", error);
+      });
+}
 
 async function loadPdf(fileData: ArrayBuffer) {
     currentPage = 1;
+    inputNameToValueMap = {};
 
     (document.getElementById('pages') as HTMLElement ).innerHTML = '';
     (document.getElementById('pageContainer') as HTMLElement ).innerHTML = '';
@@ -48,9 +69,9 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     let pdfDocument: PdfDocument = await pdfDocumentLoader.load();
 
-    let pdfPage: PdfPage = await pdfDocument.loadPage(1)
+   // let pdfPage: PdfPage = await pdfDocument.loadPage(1)
 
-    pdfPage.render(container, /* scale= */ 1);
+    //pdfPage.render(container, /* scale= */ 1);
 
     const thumbnailShownObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -73,6 +94,12 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     createThumbnailPlaceholders(pdfDocument, thumbnailShownObserver);
 
+    for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
+      await pdfDocument.loadPage(i).then(function(pdfPage: PdfPage) {
+        pdfPage.render(container, /* scale= */ 1)
+      });
+    }
+
     gotoPage(pdfDocument, currentPage);
 
 
@@ -90,10 +117,54 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     (document.getElementById("save") as HTMLElement).onclick = async function() {
       console.log("save clicked")
-      const bytes = await pdfDocument.savePdf()
-      console.log("bytes saved... now downloading")
+
+      // Select all input elements within the parent
+      const inputElements = (document.getElementById("content") as HTMLElement).querySelectorAll('input[type="text"], textarea');
+
+      // Iterate over the input elements using forEach
+      inputElements.forEach(function (inputElement) {
+        const casted = inputElement as HTMLInputElement;
+        console.log(`creating map, name = ${casted.name}, value = ${casted.value}`)
+        inputNameToValueMap[casted.name] = casted.value;
+      });
+
+      const bytes = await pdfDocument.savePdf(inputNameToValueMap)
+
       downloadBlob(bytes, "testfile")
     };
+
+
+    (document.getElementById("content") as HTMLElement).addEventListener('scroll', checkElementInView);
+
+    function checkElementInView() {
+      console.log("checking scroll...")
+      // Iterate through each element and check its position
+      const elements = document.querySelectorAll(".page");
+      var currentScrollPage = currentPage;
+      const content = (document.getElementById("content") as HTMLElement);
+      
+      var minDist = Number.MAX_VALUE;
+      elements?.forEach((element, index) => {
+        const casted = element as HTMLElement;
+        const rect = element.getBoundingClientRect();
+        const dist = Math.abs(-content.scrollTop + casted.offsetTop + casted.offsetHeight / 2 - content.offsetHeight / 2);
+
+        if (index == 1) {
+          console.log(`scrollTop = ${content.scrollTop}, offsetTop = ${casted.offsetTop}, offsetHeight=${casted.offsetHeight}, contentHeight=${content.offsetHeight}`)
+          console.log("dist = " + dist + " current min dist = " + minDist)
+        }
+        if (minDist > dist) {
+          minDist = dist;
+          console.log(`Element ${element.id} is in view.`);
+          currentScrollPage = index + 1;
+        }
+      });
+      
+      console.log("current closest page is " + currentScrollPage)
+      if (currentPage != currentScrollPage) {
+        gotoPage(pdfDocument, currentScrollPage, false);
+      }
+    }
 }
 
 function downloadBlob(data: Uint8Array, filename: string) {
@@ -150,7 +221,7 @@ function createThumbnailPlaceholders(pdfDocument: PdfDocument, thumbnailShownObs
   }
 }
 
-function gotoPage(pdfDocument: PdfDocument, pageNumber: number) {
+function gotoPage(pdfDocument: PdfDocument, pageNumber: number, scrollToPage: boolean = true) {
   const previousPageElement = document.querySelector(`.page-list-container:nth-child(${currentPage})`) as HTMLElement | null;
   if (previousPageElement) {
     previousPageElement.classList.remove("page-list-container-selected");
@@ -163,8 +234,14 @@ function gotoPage(pdfDocument: PdfDocument, pageNumber: number) {
     nthElement.classList.add("page-list-container-selected");
   }
 
-  pdfDocument.loadPage(pageNumber).then(function(pdfPage: PdfPage) {
-    container.innerHTML = '';
-    pdfPage.render(container, /* scale= */ 1);
-  });
+  if (scrollToPage) {
+    const pageElement = document.querySelector(`.page:nth-child(${currentPage})`) as HTMLElement | null;
+    if (pageElement != null) {
+      pageElement.scrollIntoView({
+        block: 'start',     // Scroll to the start of the target element
+      });
+    } else {
+      console.log("page element null")
+    }
+  }
 }
