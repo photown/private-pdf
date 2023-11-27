@@ -94,14 +94,13 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     createThumbnailPlaceholders(pdfDocument, thumbnailShownObserver);
 
+    gotoPage(pdfDocument, currentPage, false);
+
     for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
       await pdfDocument.loadPage(i).then(function(pdfPage: PdfPage) {
         pdfPage.render(container, /* scale= */ 1)
       });
     }
-
-    gotoPage(pdfDocument, currentPage);
-
 
     (document.getElementById("next") as HTMLElement).onclick = function() {
       if (currentPage + 1 <= pdfDocument.getPageCount()) {
@@ -135,6 +134,45 @@ async function loadPdf(fileData: ArrayBuffer) {
 
 
     (document.getElementById("content") as HTMLElement).addEventListener('scroll', checkElementInView);
+
+    const draggableElement = document.querySelectorAll('.draggable')[0] as HTMLElement;
+
+    let offsetX: number, offsetY: number;
+
+    const mouseDownListener = function(event: MouseEvent) {
+      offsetX = event.clientX - draggableElement.offsetLeft;
+      offsetY = event.clientY - draggableElement.offsetTop;
+      draggableElement.style.opacity = '0.7';
+
+      window.addEventListener('mousemove', mouseMoveListener);
+      window.addEventListener('mouseup', mouseUpListener);
+    }
+    const mouseMoveListener = function(event: MouseEvent) {
+      console.log(`mouseMoveListener event x=${event.clientX}, y=${event.clientY}`)
+      const x = event.clientX - offsetX;
+      const y = event.clientY - offsetY;
+
+      draggableElement.style.left = `${x}px`;
+      draggableElement.style.top = `${y}px`;
+    }
+    const mouseUpListener = function(event: MouseEvent) {
+      window.removeEventListener('mousemove', mouseMoveListener);
+      window.removeEventListener('mouseup', mouseUpListener);
+      draggableElement.style.opacity = '1';
+    }
+
+    console.log("antoan draggableElement = " + draggableElement.innerHTML)
+    const a = draggableElement.querySelector(".drag-handle") as HTMLElement;
+    a.addEventListener('mousedown', mouseDownListener);
+    draggableElement.addEventListener('focusin', function(event: FocusEvent) {
+      console.log("focus in")
+    })
+
+    draggableElement.addEventListener('focusout', function(event: FocusEvent) {
+      console.log("focus out")
+    })
+
+ 
 
     function checkElementInView() {
       console.log("checking scroll...")
