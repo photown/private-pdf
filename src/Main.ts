@@ -3,7 +3,15 @@ import * as pdfjsLib from 'pdfjs-dist';
  import { PdfDocumentLoader } from './PdfDocumentLoader';
  import { PdfDocument } from './PdfDocument';
  import { PdfPage } from './PdfPage';
- import { KeyValuePairs } from './CommonTypes';
+import { FormInputValues } from './FormInputValues';
+import { Overlays } from './overlays/Overlays';
+import { PageOverlays } from './overlays/PageOverlays';
+import { TextOverlay } from './overlays/TextOverlay';
+import { ColorUtils } from './ColorUtils';
+import { RGB } from './RGB';
+import { baselineRatio }  from './BaselineRatio';
+
+
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -24,7 +32,6 @@ const container: HTMLDivElement = document.getElementById("pageContainer") as HT
 const pageListContainer: HTMLDivElement = document.getElementById("pages") as HTMLDivElement;
 
 var currentPage = 1;
-var inputNameToValueMap: KeyValuePairs = {};
 
 (document.getElementById("select") as HTMLElement).onclick = async function() {
   const input = document.getElementById("pdf_file") as HTMLInputElement
@@ -59,19 +66,15 @@ function downloadAndLoadPdf(url: string) {
 
 async function loadPdf(fileData: ArrayBuffer) {
     currentPage = 1;
-    inputNameToValueMap = {};
+    var originalToActualRatio: number = -1;
 
     (document.getElementById('pages') as HTMLElement ).innerHTML = '';
     (document.getElementById('pageContainer') as HTMLElement ).innerHTML = '';
-
+    (document.getElementById('overlayContainer') as HTMLElement ).innerHTML = '';
     
     let pdfDocumentLoader: PdfDocumentLoader = new PdfDocumentLoader(fileData, {cMapUrl: CMAP_URL, cMapPacked: CMAP_PACKED, enableXfa: ENABLE_XFA})
 
     let pdfDocument: PdfDocument = await pdfDocumentLoader.load();
-
-   // let pdfPage: PdfPage = await pdfDocument.loadPage(1)
-
-    //pdfPage.render(container, /* scale= */ 1);
 
     const thumbnailShownObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -99,6 +102,11 @@ async function loadPdf(fileData: ArrayBuffer) {
     for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
       await pdfDocument.loadPage(i).then(function(pdfPage: PdfPage) {
         pdfPage.render(container, /* scale= */ 1)
+        if (originalToActualRatio == -1) {
+          const [_, height] = pdfPage.getSize()
+          const actualPdfHeight = (container.querySelectorAll('.page')[i-1] as HTMLElement).offsetHeight 
+          originalToActualRatio = height / actualPdfHeight
+        }
       });
     }
 
@@ -117,62 +125,165 @@ async function loadPdf(fileData: ArrayBuffer) {
     (document.getElementById("save") as HTMLElement).onclick = async function() {
       console.log("save clicked")
 
-      // Select all input elements within the parent
-      const inputElements = (document.getElementById("content") as HTMLElement).querySelectorAll('input[type="text"], textarea');
+      const formInputValues: FormInputValues = extractFormInputValues();
+      const overlays: Overlays = extractOverlays();
 
-      // Iterate over the input elements using forEach
-      inputElements.forEach(function (inputElement) {
-        const casted = inputElement as HTMLInputElement;
-        console.log(`creating map, name = ${casted.name}, value = ${casted.value}`)
-        inputNameToValueMap[casted.name] = casted.value;
-      });
-
-      const bytes = await pdfDocument.savePdf(inputNameToValueMap)
+      const bytes = await pdfDocument.savePdf(formInputValues, overlays)
 
       downloadBlob(bytes, "testfile")
     };
 
+    (document.getElementById("add-text") as HTMLElement).onclick = async function() {
+      (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
+        <div class="draggable" tabindex="0">
+          <input type="text" class="text" value="test123" />
+          <div class="text-options focused">
+            <div class="img-container drag-handle">
+              <img src="../img/icon_drag.png" draggable="false" />
+            </div>
+            <div class="img-container">
+              <img src="../img/icon_font_size.png" />
+            </div>
+            <input type="number" class="fontSize" min="8" max="96" value="14">
+            <div class="img-container">
+              <button id="field1-delete" class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+            </div>
+          </div>
+        </div>
+        `);
+        const draggables = document.querySelectorAll('.draggable');
+        const newDraggable = draggables[draggables.length-1] as HTMLElement;
+        setupDraggable(newDraggable);
 
-    (document.getElementById("content") as HTMLElement).addEventListener('scroll', checkElementInView);
+        (newDraggable.querySelector('input[type=number].fontSize') as HTMLElement).addEventListener('input', function(event: Event) { handleFontSizeInputChange(event, newDraggable) })
 
-    const draggableElement = document.querySelectorAll('.draggable')[0] as HTMLElement;
+    };
 
-    let offsetX: number, offsetY: number;
+    (document.getElementById("content") as HTMLElement).addEventListener('scroll', checkElementInView); 
 
-    const mouseDownListener = function(event: MouseEvent) {
-      offsetX = event.clientX - draggableElement.offsetLeft;
-      offsetY = event.clientY - draggableElement.offsetTop;
-      draggableElement.style.opacity = '0.7';
+  function extractFormInputValues() {
+    const formInputValues: FormInputValues = new FormInputValues();
 
-      window.addEventListener('mousemove', mouseMoveListener);
-      window.addEventListener('mouseup', mouseUpListener);
+    // TODO: textarea
+    const textInputElements = (document.getElementById("content") as HTMLElement).querySelectorAll(':not(.draggable) > input[type="text"]');
+    textInputElements.forEach(function (inputElement) {
+      const casted = inputElement as HTMLInputElement;
+      console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
+      formInputValues.textNameToValue.set(casted.name, casted.value);
+    });
+
+    const checkboxInputElements = (document.getElementById("content") as HTMLElement).querySelectorAll(':not(.draggable) > input[type="checkbox"]');
+    checkboxInputElements.forEach(function (inputElement) {
+      const casted = inputElement as HTMLInputElement;
+      console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
+      formInputValues.checkboxNameToValue.set(casted.name, casted.checked);
+    });
+    return formInputValues;
+  }
+
+  function extractOverlays(): Overlays {
+    const overlays: Overlays = new Overlays();
+    
+    const draggables = document.querySelectorAll('.draggable');
+
+    const pageOverlaysMap: Map<number, PageOverlays> = new Map();
+    for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
+      const pageOverlays: PageOverlays = new PageOverlays();
+      pageOverlaysMap.set(i, pageOverlays);
     }
-    const mouseMoveListener = function(event: MouseEvent) {
-      console.log(`mouseMoveListener event x=${event.clientX}, y=${event.clientY}`)
-      const x = event.clientX - offsetX;
-      const y = event.clientY - offsetY;
 
-      draggableElement.style.left = `${x}px`;
-      draggableElement.style.top = `${y}px`;
+    draggables.forEach(function(draggable: Element) {
+      const textInput = draggable.querySelector('input[type="text"]')
+      const contentInner = document.getElementById('content-inner') as HTMLElement
+      const content = document.getElementById('content') as HTMLElement
+      const pages = document.querySelectorAll('#content .page')
+      if (textInput) {
+        const textInputCasted = textInput as HTMLInputElement;
+        for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
+          const textOverlay: TextOverlay = new TextOverlay();
+          textOverlay.text = textInputCasted.value;
+          const page = pages[i-1] as HTMLElement;
+          const computedStyle = window.getComputedStyle(textInputCasted, null)
+          const fontSizeStr: string = computedStyle.fontSize;
+          const fontSizePx = Number.parseInt(fontSizeStr);
+
+          textOverlay.textColor = ColorUtils.normalize(ColorUtils.parseRgb(computedStyle.color) || ColorUtils.BLACK);
+          textOverlay.textSize = fontSizePx * originalToActualRatio;
+          textOverlay.fontFamily = computedStyle.fontFamily;
+          const [offsetLeft, offsetTop] = offsetRelativeToAncestor(textInputCasted, contentInner)
+          textOverlay.transform.x = (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) * originalToActualRatio// + content.scrollLeft;
+          if (i == 1) {
+            console.log(`dumping prints: (${page.offsetHeight} - (${offsetTop} + ${textInputCasted.offsetHeight} - ${page.offsetTop})) * ${originalToActualRatio}`)
+          }
+          console.log("baselineRatio = " + baselineRatio(computedStyle.fontFamily, fontSizePx) + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight / originalToActualRatio);
+          
+          const p1 = 0.5 * baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight * (originalToActualRatio + 1) / originalToActualRatio;
+          const p2 = p1 + page.offsetHeight - (offsetTop + textInputCasted.offsetHeight - page.offsetTop);
+          textOverlay.transform.y = (p2 + p2 / page.offsetHeight) * originalToActualRatio;
+          (pageOverlaysMap.get(i) as PageOverlays).textOverlays.push(textOverlay);
+        }
+      }
+    });
+    
+    for (var i = 1; i <= pdfDocument.getPageCount(); i++) {     
+      overlays.pagesOverlays.set(i, pageOverlaysMap.get(i) as PageOverlays);
     }
-    const mouseUpListener = function(event: MouseEvent) {
-      window.removeEventListener('mousemove', mouseMoveListener);
-      window.removeEventListener('mouseup', mouseUpListener);
-      draggableElement.style.opacity = '1';
+
+    return overlays;
+  }
+
+  function offsetRelativeToAncestor(child: HTMLElement, ancestor: HTMLElement): [number, number] {
+    var x: number = 0;
+    var y: number = 0;
+
+    var currentElement: HTMLElement | null = child;
+    while (currentElement != ancestor && currentElement != null) {
+      x += currentElement.offsetLeft;
+      y += currentElement.offsetTop;
+      currentElement = currentElement.parentElement;
     }
 
-    console.log("antoan draggableElement = " + draggableElement.innerHTML)
-    const a = draggableElement.querySelector(".drag-handle") as HTMLElement;
-    a.addEventListener('mousedown', mouseDownListener);
-    draggableElement.addEventListener('focusin', function(event: FocusEvent) {
-      console.log("focus in")
-    })
+    return [x, y]
 
-    draggableElement.addEventListener('focusout', function(event: FocusEvent) {
-      console.log("focus out")
-    })
+  }
 
- 
+    function setupDraggable(draggableElement: HTMLElement) {
+      let offsetX: number, offsetY: number;
+
+      const mouseDownListener = function (event: MouseEvent) {
+        console.log("mouse down!")
+        offsetX = event.clientX - draggableElement.offsetLeft;
+        offsetY = event.clientY - draggableElement.offsetTop;
+        draggableElement.style.opacity = '0.7';
+
+        window.addEventListener('mousemove', mouseMoveListener);
+        window.addEventListener('mouseup', mouseUpListener);
+      };
+      const mouseMoveListener = function (event: MouseEvent) {
+        console.log(`mouseMoveListener event x=${event.clientX}, y=${event.clientY}`);
+        const x = event.clientX - offsetX;
+        const y = event.clientY - offsetY;
+
+        draggableElement.style.left = `${x}px`;
+        draggableElement.style.top = `${y}px`;
+      };
+      const mouseUpListener = function (event: MouseEvent) {
+        window.removeEventListener('mousemove', mouseMoveListener);
+        window.removeEventListener('mouseup', mouseUpListener);
+        draggableElement.style.opacity = '1';
+      };
+
+      console.log("antoan draggableElement = " + draggableElement.innerHTML);
+      const a = draggableElement.querySelector(".drag-handle") as HTMLElement;
+      a.addEventListener('mousedown', mouseDownListener);
+      draggableElement.addEventListener('focusin', function (event: FocusEvent) {
+        console.log("focus in");
+      });
+
+      draggableElement.addEventListener('focusout', function (event: FocusEvent) {
+        console.log("focus out");
+      });
+    }
 
     function checkElementInView() {
       console.log("checking scroll...")
@@ -283,3 +394,18 @@ function gotoPage(pdfDocument: PdfDocument, pageNumber: number, scrollToPage: bo
     }
   }
 }
+function handleFontSizeInputChange(event: Event, newDraggable: HTMLElement) {
+  // Access the current value of the input field
+  const inputValue = (event.target as HTMLInputElement).value;
+
+  // Convert the input value to a number
+  const numericValue = parseFloat(inputValue);
+
+  // Check if the conversion is successful and not NaN
+  if (!isNaN(numericValue)) {
+    (newDraggable.querySelector('input[type=text].text') as HTMLElement).style.fontSize = `${numericValue}px`;
+  } else {
+    console.log('Invalid Input');
+  }
+}
+

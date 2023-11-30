@@ -79,7 +79,6 @@ limitations under the License.
       position:relative;
     }
     #content .draggable {
-      cursor: move;
       position:absolute;
     }
     #overlayContainer focused {
@@ -91,6 +90,14 @@ limitations under the License.
     #overlayContainer input[type=number]::-webkit-inner-spin-button, 
     #overlayContainer input[type=number]::-webkit-outer-spin-button {  
       opacity: 1;
+    }
+    #overlayContainer input {
+      font-size: 13px;
+      font-family: Helvetica;
+    }
+    #overlayContainer input[type=text] {
+      padding: 0px;
+      margin: 0px;
     }
     #overlayContainer .text-options input[type=number] {
       width: 36px;
@@ -109,6 +116,10 @@ limitations under the License.
       display: flex;
       align-items: center;
     }
+
+    #overlayContainer .drag-handle {
+      cursor: move;
+    }
   </style>
 
   <link rel="stylesheet" href="node_modules/pdfjs-dist/web/pdf_viewer.css">
@@ -121,6 +132,7 @@ limitations under the License.
     <input type="file" accept=".pdf" id="pdf_file" name="pdf_file">
     <button id="select">Select</button>
     <button id="save">Save</button>
+    <button id="add-text">Add text</button>
   </div>   
   <div id="flex-container">
       <div id="pages"></div>
@@ -129,21 +141,7 @@ limitations under the License.
         <div id="content-inner">
           <div id="pageContainer" class="pdfViewer singlePageView"></div>
           <div id="overlayContainer">
-            <div class="draggable" tabindex="0">
-              <input id="field1" type="text" value="test123" />
-              <div id="field1-options" class="text-options focused">
-                <div class="img-container drag-handle">
-                  <img src="../img/icon_drag.png" draggable="false" />
-                </div>
-                <div class="img-container">
-                  <img src="../img/icon_font_size.png" />
-                </div>
-                <input type="number" id="quantity" name="quantity" min="8" max="96" value="14">
-                <div class="img-container">
-                  <button id="field1-delete" class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
-                </div>
-              </div>
-            </div>
+            
           
           </div>
         </div>

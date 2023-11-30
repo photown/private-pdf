@@ -13,7 +13,9 @@ export class PdfPage {
       defaultViewport: this.pdfPageProxy.getViewport({ scale: scale }),
       eventBus: this.eventBus,
     });
-
+    console.log(`page size for page ${this.pageNumber}: width=${pdfPageView.width}, height=${pdfPageView.height}`);
+    const viewport = this.pdfPageProxy.getViewport({ scale: scale })
+    console.log(`compare this with viewport size for page ${this.pageNumber}: width=${viewport.width}, height=${viewport.height}`)
     // Associate the actual page with the view, and draw it.
     pdfPageView.setPdfPage(this.pdfPageProxy);
     pdfPageView.draw();
@@ -34,5 +36,10 @@ export class PdfPage {
       return this.pdfPageProxy
           .render({canvasContext: context2d, viewport: this.pdfPageProxy.getViewport({scale: scale})});
     }
+  }
+
+  public getSize(): [number, number] {
+    const viewport = this.pdfPageProxy.getViewport({ scale: 1 })
+    return [viewport.width, viewport.height]
   }
 }
