@@ -78,12 +78,6 @@ limitations under the License.
     #content .draggable {
       position:absolute;
     }
-    #overlayContainer focused {
-      display: block;
-    }
-    #overlayContainer unfocused {
-      display: none;
-    }
     #overlayContainer input[type=number]::-webkit-inner-spin-button, 
     #overlayContainer input[type=number]::-webkit-outer-spin-button {  
       opacity: 1;
@@ -100,14 +94,30 @@ limitations under the License.
       width: 36px;
     }
     #overlayContainer .draggable {
-      background-color: pink;
       padding: 5px;
       padding-left: 10px;
       padding-right: 10px;
       border-radius: 17px;
     }
-    #overlayContainer .text-options {
+    #overlayContainer .draggable.focused {
+      background-color: pink;
+    }
+    #overlayContainer .draggable.unfocused {
+      background-color: transparent;
+    }
+    #overlayContainer .draggable.focused .text-options {
       display: flex;
+    }
+    #overlayContainer .draggable.unfocused .text-options {
+      display: none;
+    }
+    #overlayContainer .draggable.unfocused input[type=text] {
+      background-color: transparent;
+      border: 1px dashed black
+    }
+    #overlayContainer .draggable.focused input[type=text] {
+      background-color: white;
+      border: 1px solid black
     }
     #overlayContainer .img-container {
       display: flex;

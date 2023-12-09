@@ -135,7 +135,7 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     (document.getElementById("add-text") as HTMLElement).onclick = async function() {
       (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
-        <div class="draggable" tabindex="0">
+        <div class="draggable focused" tabindex="0">
           <input type="text" class="text" value="test123" />
           <div class="text-options focused">
             <div class="img-container drag-handle">
@@ -277,11 +277,23 @@ async function loadPdf(fileData: ArrayBuffer) {
       const a = draggableElement.querySelector(".drag-handle") as HTMLElement;
       a.addEventListener('mousedown', mouseDownListener);
       draggableElement.addEventListener('focusin', function (event: FocusEvent) {
-        console.log("focus in");
+        const targetElement: Element = event.target as Element;
+        const parent = targetElement.closest('.draggable')
+        if (parent != draggableElement || draggableElement.classList.contains('focused')) {
+          return
+        }
+        draggableElement.classList.remove('unfocused')
+        draggableElement.classList.add('focused')
       });
 
       draggableElement.addEventListener('focusout', function (event: FocusEvent) {
-        console.log("focus out");
+        const targetElement: Element = event.target as Element;
+        const parent = targetElement.closest('.draggable')
+        if (parent != draggableElement || draggableElement.classList.contains('unfocused')) {
+          return
+        }
+        draggableElement.classList.remove('focused')
+        draggableElement.classList.add('unfocused')
       });
     }
 
@@ -382,6 +394,10 @@ function gotoPage(pdfDocument: PdfDocument, pageNumber: number, scrollToPage: bo
   if (nthElement) {
     nthElement.classList.add("page-list-container-selected");
   }
+
+  nthElement?.scrollIntoView({
+    block: 'nearest', 
+  })
 
   if (scrollToPage) {
     const pageElement = document.querySelector(`.page:nth-child(${currentPage})`) as HTMLElement | null;
