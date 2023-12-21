@@ -23,7 +23,7 @@ limitations under the License.
 
   <style>
     :root {
-      --toolbar-height: 45px;
+      --toolbar-height: 65px;
     }
     body {
       background-color: #808080;
@@ -130,6 +130,16 @@ limitations under the License.
     #pages .page-list-canvas {
       max-width: 96px
     }
+
+    #toolbar input[type=file] label {
+      background-color: indigo;
+      color: white;
+      padding: 0.5rem;
+      font-family: sans-serif;
+      border-radius: 0.3rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
   </style>
 
   <link rel="stylesheet" href="node_modules/pdfjs-dist/web/pdf_viewer.css">
@@ -137,13 +147,27 @@ limitations under the License.
 
 <body>
   <div id="toolbar">
-    <button id="previous">Previous</button>
-    <button id="next">Next</button>
-    <input type="file" accept=".pdf" id="pdf_file" name="pdf_file">
+    <button id="previous" alt="Go to the previous page">
+      <img src="img/button_previous_page.png"/>
+    </button>
+    <button id="next" alt="Go to the next page">
+      <img src="img/button_next_page.png" />
+    </button>
+    <input type="file" accept=".pdf" id="pdf_file" name="pdf_file" hidden />
+    <button onclick="document.getElementById('pdf_file').click()" alt="Choose a PDF file">
+      <img src="img/button_choose_pdf.png">
+    </button>
     <button id="select">Select</button>
-    <button id="save">Save</button>
-    <button id="add-text">Add text</button>
-    <input type="file" accept="image/png, image/jpeg" id="add-image" name="add-image">Add image</button>
+    <button id="save" alt="Save the PDF to disk">
+      <img src="img/button_save.png">
+    </button>
+    <button id="insert-text" alt="Insert text">
+      <img src="img/button_insert_text.png">
+    </button>
+    <input type="file" accept="image/png, image/jpeg" id="insert-image" name="insert-image" hidden />
+    <button onclick="document.getElementById('insert-image').click()" alt="Insert image">
+      <img src="img/button_insert_image.png">
+    </button>
   </div>   
   <div id="flex-container">
       <div id="pages"></div>

@@ -134,7 +134,7 @@ async function loadPdf(fileData: ArrayBuffer) {
       downloadBlob(bytes, "testfile")
     };
 
-    (document.getElementById("add-text") as HTMLElement).onclick = async function() {
+    (document.getElementById("insert-text") as HTMLElement).onclick = async function() {
       (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
         <div class="text draggable focused" tabindex="0">
           <input type="text" class="text" value="test123" />
@@ -160,7 +160,7 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     };
 
-    (document.getElementById("add-image") as HTMLElement).onchange = async function() {
+    (document.getElementById("insert-image") as HTMLElement).onchange = async function() {
 
       (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
         <div class="image draggable focused" tabindex="0">
@@ -180,7 +180,7 @@ async function loadPdf(fileData: ArrayBuffer) {
          const newDraggable = draggables[draggables.length-1] as HTMLElement;
          setupDraggable(newDraggable);
 
-         var input = document.getElementById("add-image") as HTMLInputElement
+         var input = document.getElementById("insert-image") as HTMLInputElement
          var img = newDraggable.querySelector(".image-wrapper") as HTMLImageElement
          var file = input.files?.[0];
 
