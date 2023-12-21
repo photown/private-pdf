@@ -10,6 +10,7 @@ import { TextOverlay } from './overlays/TextOverlay';
 import { ColorUtils } from './ColorUtils';
 import { RGB } from './RGB';
 import { baselineRatio }  from './BaselineRatio';
+import { ImageOverlay, ImageType } from './overlays/ImageOverlay';
 
 
 
@@ -135,7 +136,7 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     (document.getElementById("add-text") as HTMLElement).onclick = async function() {
       (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
-        <div class="draggable focused" tabindex="0">
+        <div class="text draggable focused" tabindex="0">
           <input type="text" class="text" value="test123" />
           <div class="text-options focused">
             <div class="img-container drag-handle">
@@ -162,8 +163,8 @@ async function loadPdf(fileData: ArrayBuffer) {
     (document.getElementById("add-image") as HTMLElement).onchange = async function() {
 
       (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
-        <div class="draggable focused" tabindex="0">
-          <img class="image" />
+        <div class="image draggable focused" tabindex="0">
+          <img class="image-wrapper" />
           <div class="text-options focused">
             <div class="img-container drag-handle">
               <img src="../img/icon_drag.png" draggable="false" />
@@ -180,14 +181,19 @@ async function loadPdf(fileData: ArrayBuffer) {
          setupDraggable(newDraggable);
 
          var input = document.getElementById("add-image") as HTMLInputElement
-         var img = newDraggable.querySelector(".image") as HTMLImageElement
+         var img = newDraggable.querySelector(".image-wrapper") as HTMLImageElement
          var file = input.files?.[0];
 
          if (file) {
            var reader = new FileReader();
 
           reader.onload = function (e: ProgressEvent<FileReader>) {
-            img.src = e.target?.result as string;
+            const imageBase64 = e.target?.result as string || null;
+            if (imageBase64 != null && validateBase64(imageBase64)) {
+              img.src = imageBase64;
+            } else {
+              console.log(`Invalid image format: ${imageBase64} must be either PNG or JPEG.`)
+            }
           };
 
            reader.readAsDataURL(file);
@@ -195,7 +201,7 @@ async function loadPdf(fileData: ArrayBuffer) {
            img.src = ''; // Clear the image if no file is selected
          }
 
-         const image = (newDraggable.querySelector('.image') as HTMLImageElement);
+         const image = (newDraggable.querySelector('.image-wrapper') as HTMLImageElement);
          (newDraggable.querySelector('input[type=number].scale') as HTMLElement).addEventListener('input', function(event: Event) { handleScaleInputChange(event, image) })
 
     };
@@ -234,36 +240,12 @@ async function loadPdf(fileData: ArrayBuffer) {
     }
 
     draggables.forEach(function(draggable: Element) {
-      const textInput = draggable.querySelector('input[type="text"]')
-      const contentInner = document.getElementById('content-inner') as HTMLElement
-      const content = document.getElementById('content') as HTMLElement
-      const pages = document.querySelectorAll('#content .page')
-      if (textInput) {
-        const textInputCasted = textInput as HTMLInputElement;
-        for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
-          const textOverlay: TextOverlay = new TextOverlay();
-          textOverlay.text = textInputCasted.value;
-          const page = pages[i-1] as HTMLElement;
-          const computedStyle = window.getComputedStyle(textInputCasted, null)
-          const fontSizeStr: string = computedStyle.fontSize;
-          const fontSizePx = Number.parseInt(fontSizeStr);
-
-          textOverlay.textColor = ColorUtils.normalize(ColorUtils.parseRgb(computedStyle.color) || ColorUtils.BLACK);
-          textOverlay.textSize = fontSizePx * originalToActualRatio;
-          textOverlay.fontFamily = computedStyle.fontFamily;
-          const [offsetLeft, offsetTop] = offsetRelativeToAncestor(textInputCasted, contentInner)
-          textOverlay.transform.x = (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) * originalToActualRatio// + content.scrollLeft;
-          if (i == 1) {
-            console.log(`dumping prints: (${page.offsetHeight} - (${offsetTop} + ${textInputCasted.offsetHeight} - ${page.offsetTop})) * ${originalToActualRatio}`)
-          }
-          console.log("baselineRatio = " + baselineRatio(computedStyle.fontFamily, fontSizePx) + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight / originalToActualRatio);
-          
-          const p1 = 0.5 * baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight * (originalToActualRatio + 1) / originalToActualRatio;
-          const p2 = p1 + page.offsetHeight - (offsetTop + textInputCasted.offsetHeight - page.offsetTop);
-          textOverlay.transform.y = (p2 + p2 / page.offsetHeight) * originalToActualRatio;
-          (pageOverlaysMap.get(i) as PageOverlays).textOverlays.push(textOverlay);
-        }
+      if (draggable.classList.contains('text')) {
+        addTextOverlay(draggable, pageOverlaysMap);
+      } else if (draggable.classList.contains('image')) {
+        addImageOverlay(draggable, pageOverlaysMap);
       }
+      
     });
     
     for (var i = 1; i <= pdfDocument.getPageCount(); i++) {     
@@ -273,20 +255,91 @@ async function loadPdf(fileData: ArrayBuffer) {
     return overlays;
   }
 
+  function addImageOverlay(draggable: Element, pageOverlaysMap: Map<number, PageOverlays>) {
+    const image = draggable.querySelector('.image-wrapper') as HTMLImageElement
+    if (image) {
+      const pages = document.querySelectorAll('#content .page');
+      for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
+        const page = pages[i - 1] as HTMLElement;
+        const imageType = extractImageTypeFromBase64(image.src)
+        if (imageType == null) {
+          console.log(`Could not extract image type for base64 image ${image.src} - not PNG nor JPEG.`)
+          continue;
+        }
+        const scale = parseFloat((draggable.querySelector('input[type=number].scale') as HTMLInputElement).value) / 100;
+        const width = image.naturalWidth * scale * originalToActualRatio
+        const height = image.naturalHeight * scale * originalToActualRatio
+        const imageOverlay = new ImageOverlay(image.src, width, height, imageType);
+        imageOverlay.transform.rotation = 0;
+        const contentInner = document.getElementById('content-inner') as HTMLElement;
+        const [offsetLeft, offsetTop] = offsetRelativeToAncestor(image, contentInner);
+        imageOverlay.transform.x = offsetLeft * originalToActualRatio;
+        imageOverlay.transform.y = (page.offsetHeight - offsetTop + page.offsetTop) * originalToActualRatio - height;
+        (pageOverlaysMap.get(i) as PageOverlays).imageOverlays.push(imageOverlay);
+      }
+    }
+  }
+
+  function extractImageTypeFromBase64(base64: string): ImageType|null {
+    if (base64.startsWith('data:image/png;')) {
+      return ImageType.PNG;
+    } else if (base64.startsWith('data:image/jpeg;')) {
+      return ImageType.JPEG;
+    }
+    return null
+  }
+
+  function validateBase64(base64: string): boolean {
+    return extractImageTypeFromBase64(base64) != null
+  }
+
+  function addTextOverlay(draggable: Element, pageOverlaysMap: Map<number, PageOverlays>) {
+    const textInput = draggable.querySelector('input[type="text"]');
+    const contentInner = document.getElementById('content-inner') as HTMLElement;
+    const pages = document.querySelectorAll('#content .page');
+    if (textInput) {
+      const textInputCasted = textInput as HTMLInputElement;
+      for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
+        const textOverlay: TextOverlay = new TextOverlay();
+        textOverlay.text = textInputCasted.value;
+        const page = pages[i - 1] as HTMLElement;
+        const computedStyle = window.getComputedStyle(textInputCasted, null);
+        const fontSizeStr: string = computedStyle.fontSize;
+        const fontSizePx = Number.parseInt(fontSizeStr);
+  
+        textOverlay.textColor = ColorUtils.normalize(ColorUtils.parseRgb(computedStyle.color) || ColorUtils.BLACK);
+        textOverlay.textSize = fontSizePx * originalToActualRatio;
+        textOverlay.fontFamily = computedStyle.fontFamily;
+        const [offsetLeft, offsetTop] = offsetRelativeToAncestor(textInputCasted, contentInner);
+        textOverlay.transform.x = (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) * originalToActualRatio; // + content.scrollLeft;
+        if (i == 1) {
+          console.log(`dumping prints: (${page.offsetHeight} - (${offsetTop} + ${textInputCasted.offsetHeight} - ${page.offsetTop})) * ${originalToActualRatio}`);
+        }
+        console.log("baselineRatio = " + baselineRatio(computedStyle.fontFamily, fontSizePx) + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight / originalToActualRatio);
+  
+        const p1 = 0.5 * baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight * (originalToActualRatio + 1) / originalToActualRatio;
+        const p2 = p1 + page.offsetHeight - (offsetTop + textInputCasted.offsetHeight - page.offsetTop);
+        textOverlay.transform.y = (p2 + p2 / page.offsetHeight) * originalToActualRatio;
+        (pageOverlaysMap.get(i) as PageOverlays).textOverlays.push(textOverlay);
+      }
+    }
+  }
+  
   function offsetRelativeToAncestor(child: HTMLElement, ancestor: HTMLElement): [number, number] {
     var x: number = 0;
     var y: number = 0;
-
+  
     var currentElement: HTMLElement | null = child;
     while (currentElement != ancestor && currentElement != null) {
       x += currentElement.offsetLeft;
       y += currentElement.offsetTop;
       currentElement = currentElement.parentElement;
     }
-
+  
     return [x, y]
-
+  
   }
+
 
     function setupDraggable(draggableElement: HTMLElement) {
       let offsetX: number, offsetY: number;

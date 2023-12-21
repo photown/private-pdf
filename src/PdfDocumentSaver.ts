@@ -1,9 +1,10 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { degrees, PDFDocument, rgb, StandardFonts, PDFField, PDFFont } from 'pdf-lib';
+import { degrees, PDFDocument, rgb, StandardFonts, PDFField, PDFFont, PDFImage } from 'pdf-lib';
 
 import { PdfDocument } from './PdfDocument';
 import { FormInputValues } from './FormInputValues';
 import { Overlays } from './overlays/Overlays';
+import { ImageType } from './overlays/ImageOverlay';
 
 export class PdfDocumentSaver {
   constructor() {}
@@ -60,6 +61,25 @@ export class PdfDocumentSaver {
                     textOverlay.textColor.green,
                     textOverlay.textColor.blue),
             })
+        }
+
+        for (const imageOverlay of pageOverlays.imageOverlays) {
+            const pdfImage = 
+                imageOverlay.imageType == ImageType.PNG ? await pdfDoc.embedPng(imageOverlay.base64)
+                : imageOverlay.imageType == ImageType.JPEG ? await pdfDoc.embedJpg(imageOverlay.base64) 
+                : null;
+            if (pdfImage == null) {
+                console.log(`Error reading pdfPage - invalid image format. ${imageOverlay}`)
+                continue;
+            }
+            page.drawImage(pdfImage, {
+                x: imageOverlay.transform.x,
+                y: imageOverlay.transform.y,
+                width: imageOverlay.width,
+                height: imageOverlay.height,
+                rotate: degrees(imageOverlay.transform.rotation),
+                opacity: 1,
+              })
         }
     }
 
