@@ -38,6 +38,8 @@ limitations under the License.
     }
     #toolbar-inner {
       padding: 10px;
+      display: flex;
+      align-items: center;
     }
     #pages {
       display: flex;
@@ -143,6 +145,21 @@ limitations under the License.
       cursor: pointer;
       margin-top: 1rem;
     }
+
+    .separator {
+      width:20px;
+      display:inline-block;
+    }
+
+    #current-page {
+      width: 25px;
+    }
+
+    #nav-bar {
+      display:flex;
+      flex-direction: row;    
+      align-items: center;
+    }
   </style>
 
   <link rel="stylesheet" href="node_modules/pdfjs-dist/web/pdf_viewer.css">
@@ -151,12 +168,6 @@ limitations under the License.
 <body>
   <div id="toolbar">
     <div id="toolbar-inner">
-      <button id="previous" alt="Go to the previous page">
-        <img src="img/button_previous_page.png"/>
-      </button>
-      <button id="next" alt="Go to the next page">
-        <img src="img/button_next_page.png" />
-      </button>
       <input type="file" accept=".pdf" id="pdf_file" name="pdf_file" hidden />
       <button onclick="document.getElementById('pdf_file').click()" alt="Choose a PDF file">
         <img src="img/button_choose_pdf.png">
@@ -164,6 +175,7 @@ limitations under the License.
       <button id="save" alt="Save the PDF to disk">
         <img src="img/button_save.png">
       </button>
+      <div class="separator"></div>
       <button id="insert-text" alt="Insert text">
         <img src="img/button_insert_text.png">
       </button>
@@ -171,6 +183,16 @@ limitations under the License.
       <button onclick="document.getElementById('insert-image').click()" alt="Insert image">
         <img src="img/button_insert_image.png">
       </button>
+      <div class="separator"></div>
+      <div id="nav-bar">
+        <button id="previous" alt="Go to the previous page">
+          <img src="img/button_previous_page.png"/>
+        </button>
+        <input type="text" id="current-page" value="1"> / <span id="total-pages"></span>
+        <button id="next" alt="Go to the next page">
+          <img src="img/button_next_page.png" />
+        </button>
+      </div>
     </div>
   </div>   
   <div id="flex-container">

@@ -72,10 +72,14 @@ async function loadPdf(fileData: ArrayBuffer) {
     (document.getElementById('pages') as HTMLElement ).innerHTML = '';
     (document.getElementById('pageContainer') as HTMLElement ).innerHTML = '';
     (document.getElementById('overlayContainer') as HTMLElement ).innerHTML = '';
+    (document.querySelector('#current-page') as HTMLElement).innerHTML = '1';
+    (document.querySelector('#total-pages') as HTMLElement).innerHTML = '';
     
     let pdfDocumentLoader: PdfDocumentLoader = new PdfDocumentLoader(fileData, {cMapUrl: CMAP_URL, cMapPacked: CMAP_PACKED, enableXfa: ENABLE_XFA})
 
     let pdfDocument: PdfDocument = await pdfDocumentLoader.load();
+
+    (document.querySelector('#total-pages') as HTMLElement).innerHTML = pdfDocument.getPageCount().toString();
 
     const thumbnailShownObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -122,6 +126,26 @@ async function loadPdf(fileData: ArrayBuffer) {
         gotoPage(pdfDocument, currentPage-1);
       }
     };
+
+    (document.querySelector('#current-page') as HTMLElement).addEventListener('input', function(event) {
+      const input = (event.target as HTMLInputElement);
+      const inputValue = input.value;
+      const page = parseFloat(inputValue)
+      if (!isNaN(page) && page > 0 && page <= pdfDocument.getPageCount()) {
+
+      } else {
+        input.value = currentPage.toString();
+      }
+    });
+
+    (document.querySelector('#current-page') as HTMLElement).addEventListener('focusout', function(event) {
+      const input = (event.target as HTMLInputElement);
+      const inputValue = input.value;
+      const page = parseFloat(inputValue)
+      if (!isNaN(page) && page > 0 && page <= pdfDocument.getPageCount()) {
+        gotoPage(pdfDocument, page);
+      }
+    });
 
     (document.getElementById("save") as HTMLElement).onclick = async function() {
       console.log("save clicked")
@@ -490,6 +514,7 @@ function gotoPage(pdfDocument: PdfDocument, pageNumber: number, scrollToPage: bo
   }
   
   currentPage = pageNumber;
+  (document.querySelector('#current-page') as HTMLInputElement).value = currentPage.toString();
 
   const nthElement = document.querySelector(`.page-list-container:nth-child(${currentPage})`) as HTMLElement | null;
   if (nthElement) {
