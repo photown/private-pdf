@@ -159,6 +159,47 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     };
 
+    (document.getElementById("add-image") as HTMLElement).onchange = async function() {
+
+      (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
+        <div class="draggable focused" tabindex="0">
+          <img class="image" />
+          <div class="text-options focused">
+            <div class="img-container drag-handle">
+              <img src="../img/icon_drag.png" draggable="false" />
+            </div>
+            <input type="number" class="scale" min="1" value="100">
+            <div class="img-container">
+              <button id="field1-delete" class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+            </div>
+          </div>
+        </div>
+        `);
+         const draggables = document.querySelectorAll('.draggable');
+         const newDraggable = draggables[draggables.length-1] as HTMLElement;
+         setupDraggable(newDraggable);
+
+         var input = document.getElementById("add-image") as HTMLInputElement
+         var img = newDraggable.querySelector(".image") as HTMLImageElement
+         var file = input.files?.[0];
+
+         if (file) {
+           var reader = new FileReader();
+
+          reader.onload = function (e: ProgressEvent<FileReader>) {
+            img.src = e.target?.result as string;
+          };
+
+           reader.readAsDataURL(file);
+         } else {
+           img.src = ''; // Clear the image if no file is selected
+         }
+
+         const image = (newDraggable.querySelector('.image') as HTMLImageElement);
+         (newDraggable.querySelector('input[type=number].scale') as HTMLElement).addEventListener('input', function(event: Event) { handleScaleInputChange(event, image) })
+
+    };
+
     (document.getElementById("content") as HTMLElement).addEventListener('scroll', checkElementInView); 
 
   function extractFormInputValues() {
@@ -250,6 +291,8 @@ async function loadPdf(fileData: ArrayBuffer) {
     function setupDraggable(draggableElement: HTMLElement) {
       let offsetX: number, offsetY: number;
 
+      draggableElement.focus()
+
       const mouseDownListener = function (event: MouseEvent) {
         console.log("mouse down!")
         offsetX = event.clientX - draggableElement.offsetLeft;
@@ -273,7 +316,6 @@ async function loadPdf(fileData: ArrayBuffer) {
         draggableElement.style.opacity = '1';
       };
 
-      console.log("antoan draggableElement = " + draggableElement.innerHTML);
       const a = draggableElement.querySelector(".drag-handle") as HTMLElement;
       a.addEventListener('mousedown', mouseDownListener);
       draggableElement.addEventListener('focusin', function (event: FocusEvent) {
@@ -287,11 +329,17 @@ async function loadPdf(fileData: ArrayBuffer) {
       });
 
       draggableElement.addEventListener('focusout', function (event: FocusEvent) {
-        const targetElement: Element = event.target as Element;
-        const parent = targetElement.closest('.draggable')
-        if (parent != draggableElement || draggableElement.classList.contains('unfocused')) {
-          return
+        if (draggableElement.classList.contains('unfocused')) {
+          return;
         }
+        const newlyFocusedElement: Element = event.relatedTarget as Element;
+        if (newlyFocusedElement != null) {
+          const parent = newlyFocusedElement.closest('.draggable')
+          if (parent == draggableElement) {
+            return
+          }
+        }
+
         draggableElement.classList.remove('focused')
         draggableElement.classList.add('unfocused')
       });
@@ -424,4 +472,21 @@ function handleFontSizeInputChange(event: Event, newDraggable: HTMLElement) {
     console.log('Invalid Input');
   }
 }
+
+function handleScaleInputChange(event: Event, image: HTMLImageElement) {
+  // Access the current value of the input field
+  const inputValue = (event.target as HTMLInputElement).value;
+
+  // Convert the input value to a number
+  const numericValue = parseFloat(inputValue);
+
+  // Check if the conversion is successful and not NaN
+  if (!isNaN(numericValue)) {
+    image.width = image.naturalWidth * numericValue / 100;
+    image.height = image.naturalHeight * numericValue / 100;
+  } else {
+    console.log('Invalid Input');
+  }
+}
+
 
