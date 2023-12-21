@@ -34,7 +34,7 @@ const pageListContainer: HTMLDivElement = document.getElementById("pages") as HT
 
 var currentPage = 1;
 
-(document.getElementById("select") as HTMLElement).onclick = async function() {
+(document.getElementById("pdf_file") as HTMLElement).onchange = async function() {
   const input = document.getElementById("pdf_file") as HTMLInputElement
   console.log(input.files)
   if (input.files && input.files.length > 0) {
