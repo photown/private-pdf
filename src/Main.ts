@@ -195,8 +195,7 @@ async function loadPdf(fileData: ArrayBuffer) {
         (newDraggable.querySelector('input[type=color].fontColor') as HTMLElement).addEventListener('input', function(event: Event) { handleFontColorInputChange(event, newDraggable) });
     };
 
-    (document.getElementById("insert-image") as HTMLElement).onchange = async function() {
-
+    (document.getElementById("insert-image-input") as HTMLElement).onchange = async function() {
       (document.getElementById('overlayContainer') as HTMLElement).insertAdjacentHTML('beforeend', `
         <div class="image draggable focused" tabindex="0">
           <img class="image-wrapper" />
@@ -216,7 +215,7 @@ async function loadPdf(fileData: ArrayBuffer) {
          const newDraggable = draggables[draggables.length-1] as HTMLElement;
          setupDraggable(newDraggable, draggables.length);
 
-         var input = document.getElementById("insert-image") as HTMLInputElement
+         var input = document.getElementById("insert-image-input") as HTMLInputElement
          var img = newDraggable.querySelector(".image-wrapper") as HTMLImageElement
          var file = input.files?.[0];
 
@@ -312,9 +311,9 @@ async function loadPdf(fileData: ArrayBuffer) {
 
     draggables.forEach(function(draggable: Element) {
       if (draggable.classList.contains('text')) {
-        addTextOverlay(draggable, pageOverlaysMap);
+        addTextOverlay(draggable as HTMLElement, pageOverlaysMap);
       } else if (draggable.classList.contains('image')) {
-        addImageOverlay(draggable, pageOverlaysMap);
+        addImageOverlay(draggable as HTMLElement, pageOverlaysMap);
       }
       
     });
@@ -326,12 +325,30 @@ async function loadPdf(fileData: ArrayBuffer) {
     return overlays;
   }
 
-  function addImageOverlay(draggable: Element, pageOverlaysMap: Map<number, PageOverlays>) {
+  function isPointInRect(point: number[], rectTopLeft: number[], rectBottomRight: number[]) : boolean {
+    return point[0] > rectTopLeft[0] 
+        && point[0] < rectBottomRight[0] 
+        && point[1] > rectTopLeft[1] 
+        && point[1] < rectBottomRight[1];
+  }
+
+  function doRectsOverlap(rect1TopLeft: number[], rect1BottomRight: number[], rect2TopLeft: number[], rect2BottomRight: number[]): boolean {
+    return isPointInRect(rect1TopLeft, rect2TopLeft, rect2BottomRight)
+    || isPointInRect(rect1BottomRight, rect2TopLeft, rect2BottomRight)
+    || isPointInRect([rect1TopLeft[0], rect1BottomRight[1]], rect2TopLeft, rect2BottomRight)
+    || isPointInRect([rect1BottomRight[0], rect1TopLeft[1]], rect2TopLeft, rect2BottomRight)
+  }
+
+  function addImageOverlay(draggable: HTMLElement, pageOverlaysMap: Map<number, PageOverlays>) {
     const image = draggable.querySelector('.image-wrapper') as HTMLImageElement
     if (image) {
       const pages = document.querySelectorAll('#content .page');
-      for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
-        const page = pages[i - 1] as HTMLElement;
+      
+      const pagesToIncludeImage = getPagesToInclude(pages, draggable);
+      
+      for (const pageNumber of pagesToIncludeImage) {
+        const page = pages[pageNumber - 1] as HTMLElement;
+        
         const imageType = extractImageTypeFromBase64(image.src)
         if (imageType == null) {
           console.log(`Could not extract image type for base64 image ${image.src} - not PNG nor JPEG.`)
@@ -346,9 +363,25 @@ async function loadPdf(fileData: ArrayBuffer) {
         const [offsetLeft, offsetTop] = offsetRelativeToAncestor(image, contentInner);
         imageOverlay.transform.x = offsetLeft * originalToActualRatio;
         imageOverlay.transform.y = (page.offsetHeight - offsetTop + page.offsetTop) * originalToActualRatio - height;
-        (pageOverlaysMap.get(i) as PageOverlays).imageOverlays.push(imageOverlay);
+        (pageOverlaysMap.get(pageNumber) as PageOverlays).imageOverlays.push(imageOverlay);
       }
     }
+  }
+
+  // Returns a list of the page numbers for the pages that the draggable overlaps with. 
+  function getPagesToInclude(pages: NodeListOf<Element>, draggable: HTMLElement): Array<number> {
+    const pagesToInclude = [];
+    for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
+      const page = pages[i - 1] as HTMLElement;
+      const draggableTopLeft = [draggable.offsetLeft, draggable.offsetTop];
+      const draggableBottomRight = [draggable.offsetLeft + draggable.offsetWidth, draggable.offsetTop + draggable.offsetHeight];
+      const pageTopLeft = [page.offsetLeft, page.offsetTop];
+      const pageBottomRight = [page.offsetLeft + page.offsetWidth, page.offsetTop + page.offsetHeight];
+      if (doRectsOverlap(draggableTopLeft, draggableBottomRight, pageTopLeft, pageBottomRight)) {
+        pagesToInclude.push(i);
+      }
+    }
+    return pagesToInclude;
   }
 
   function extractImageTypeFromBase64(base64: string): ImageType|null {
@@ -364,16 +397,18 @@ async function loadPdf(fileData: ArrayBuffer) {
     return extractImageTypeFromBase64(base64) != null
   }
 
-  function addTextOverlay(draggable: Element, pageOverlaysMap: Map<number, PageOverlays>) {
+  function addTextOverlay(draggable: HTMLElement, pageOverlaysMap: Map<number, PageOverlays>) {
     const textInput = draggable.querySelector('input[type="text"]');
     const contentInner = document.getElementById('content-inner') as HTMLElement;
     const pages = document.querySelectorAll('#content .page');
     if (textInput) {
       const textInputCasted = textInput as HTMLInputElement;
-      for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
+      const pagesToIncludeImage = getPagesToInclude(pages, draggable);
+
+      for (const pageNumber of pagesToIncludeImage) {
         const textOverlay: TextOverlay = new TextOverlay();
         textOverlay.text = textInputCasted.value;
-        const page = pages[i - 1] as HTMLElement;
+        const page = pages[pageNumber - 1] as HTMLElement;
         const computedStyle = window.getComputedStyle(textInputCasted, null);
         const fontSizeStr: string = computedStyle.fontSize;
         const fontSizePx = Number.parseInt(fontSizeStr);
@@ -382,16 +417,11 @@ async function loadPdf(fileData: ArrayBuffer) {
         textOverlay.textSize = fontSizePx * originalToActualRatio;
         textOverlay.fontFamily = computedStyle.fontFamily;
         const [offsetLeft, offsetTop] = offsetRelativeToAncestor(textInputCasted, contentInner);
-        textOverlay.transform.x = (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) * originalToActualRatio; // + content.scrollLeft;
-        if (i == 1) {
-          console.log(`dumping prints: (${page.offsetHeight} - (${offsetTop} + ${textInputCasted.offsetHeight} - ${page.offsetTop})) * ${originalToActualRatio}`);
-        }
-        console.log("baselineRatio = " + baselineRatio(computedStyle.fontFamily, fontSizePx) + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight + " " + baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight / originalToActualRatio);
-  
+        textOverlay.transform.x = (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) * originalToActualRatio; 
         const p1 = 0.5 * baselineRatio(computedStyle.fontFamily, fontSizePx) * textInputCasted.offsetHeight * (originalToActualRatio + 1) / originalToActualRatio;
         const p2 = p1 + page.offsetHeight - (offsetTop + textInputCasted.offsetHeight - page.offsetTop);
         textOverlay.transform.y = (p2 + p2 / page.offsetHeight) * originalToActualRatio;
-        (pageOverlaysMap.get(i) as PageOverlays).textOverlays.push(textOverlay);
+        (pageOverlaysMap.get(pageNumber) as PageOverlays).textOverlays.push(textOverlay);
       }
     }
   }
@@ -428,7 +458,6 @@ async function loadPdf(fileData: ArrayBuffer) {
       }
 
       const mouseDownListener = function (event: MouseEvent) {
-        console.log("mouse down!")
         offsetX = event.clientX - draggableElement.offsetLeft;
         offsetY = event.clientY - draggableElement.offsetTop;
         draggableElement.style.opacity = '0.7';
@@ -437,7 +466,6 @@ async function loadPdf(fileData: ArrayBuffer) {
         window.addEventListener('mouseup', mouseUpListener);
       };
       const mouseMoveListener = function (event: MouseEvent) {
-        console.log(`mouseMoveListener event x=${event.clientX}, y=${event.clientY}`);
         const x = event.clientX - offsetX;
         const y = event.clientY - offsetY;
 
