@@ -8,29 +8,37 @@ export class PdfPage {
     private readonly eventBus: EventBus
   ) {}
 
-  public async render(container: HTMLDivElement | null, scale: number) {
+  public async render(
+    container: HTMLDivElement | null,
+    scale: number,
+    rotation: number
+  ) {
     // Creating the page view with default parameters.
     const pdfPageView = new PDFPageView({
       container: container != null ? container : undefined,
       id: this.pageNumber,
       scale: scale,
-      defaultViewport: this.pdfPageProxy.getViewport({ scale: scale }),
+      defaultViewport: this.pdfPageProxy.getViewport({
+        scale: scale,
+        rotation: rotation,
+      }),
       eventBus: this.eventBus,
     });
-    console.log(
-      `page size for page ${this.pageNumber}: width=${pdfPageView.width}, height=${pdfPageView.height}`
-    );
-    const viewport = this.pdfPageProxy.getViewport({ scale: scale });
-    console.log(
-      `compare this with viewport size for page ${this.pageNumber}: width=${viewport.width}, height=${viewport.height}`
-    );
+    pdfPageView.rotation = rotation;
     // Associate the actual page with the view, and draw it.
     pdfPageView.setPdfPage(this.pdfPageProxy);
     pdfPageView.draw();
   }
 
-  public async renderThumbnail(canvas: HTMLCanvasElement, maxSizePx: number) {
-    const defaultViewPort = this.pdfPageProxy.getViewport({ scale: 1 });
+  public async renderThumbnail(
+    canvas: HTMLCanvasElement,
+    maxSizePx: number,
+    rotation: number
+  ) {
+    const defaultViewPort = this.pdfPageProxy.getViewport({
+      scale: 1,
+      rotation: rotation,
+    });
     if (defaultViewPort.width > defaultViewPort.height) {
       canvas.width = maxSizePx;
       canvas.height =
@@ -50,7 +58,10 @@ export class PdfPage {
       ) as CanvasRenderingContext2D;
       return this.pdfPageProxy.render({
         canvasContext: context2d,
-        viewport: this.pdfPageProxy.getViewport({ scale: scale }),
+        viewport: this.pdfPageProxy.getViewport({
+          scale: scale,
+          rotation: rotation,
+        }),
       });
     }
   }

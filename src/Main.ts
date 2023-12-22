@@ -109,7 +109,8 @@ async function loadPdf(fileData: ArrayBuffer) {
           .then(function (page: PdfPage) {
             page.renderThumbnail(
               entry.target as HTMLCanvasElement,
-              THUMBNAIL_MAX_SIZE
+              THUMBNAIL_MAX_SIZE,
+              /* rotation = */ 0
             );
           })
           .then(function () {
@@ -125,7 +126,7 @@ async function loadPdf(fileData: ArrayBuffer) {
 
   for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
     await pdfDocument.loadPage(i).then(function (pdfPage: PdfPage) {
-      pdfPage.render(container, /* scale= */ 1);
+      pdfPage.render(container, /* scale = */ 1, /* rotation = */ 0);
       if (originalToActualRatio == -1) {
         const [_, height] = pdfPage.getSize();
         const actualPdfHeight = (
