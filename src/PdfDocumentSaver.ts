@@ -26,7 +26,6 @@ export class PdfDocumentSaver {
         }
     }
 
-    // TODO: placing draggables
     // TODO: empty state handling
     // TODO: text areas, dropdowns, buttons, option list, radiobuttons
     // TODO: validation

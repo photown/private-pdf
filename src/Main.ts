@@ -178,7 +178,7 @@ async function loadPdf(fileData: ArrayBuffer) {
         `);
         const draggables = document.querySelectorAll('.draggable');
         const newDraggable = draggables[draggables.length-1] as HTMLElement;
-        setupDraggable(newDraggable);
+        setupDraggable(newDraggable, draggables.length);
 
         (newDraggable.querySelector('input[type=number].fontSize') as HTMLElement).addEventListener('input', function(event: Event) { handleFontSizeInputChange(event, newDraggable) })
 
@@ -202,7 +202,7 @@ async function loadPdf(fileData: ArrayBuffer) {
         `);
          const draggables = document.querySelectorAll('.draggable');
          const newDraggable = draggables[draggables.length-1] as HTMLElement;
-         setupDraggable(newDraggable);
+         setupDraggable(newDraggable, draggables.length);
 
          var input = document.getElementById("insert-image") as HTMLInputElement
          var img = newDraggable.querySelector(".image-wrapper") as HTMLImageElement
@@ -365,10 +365,16 @@ async function loadPdf(fileData: ArrayBuffer) {
   }
 
 
-    function setupDraggable(draggableElement: HTMLElement) {
+    function setupDraggable(draggableElement: HTMLElement, numDraggables: number) {
       let offsetX: number, offsetY: number;
 
+      const scrollTop = (document.getElementById('content') as HTMLElement).scrollTop;
+      draggableElement.style.left = (50 + (numDraggables - 1) * 10) + 'px';
+      draggableElement.style.top = scrollTop + (50 + (numDraggables - 1) * 10) + 'px';
+
+      // Note that focusing scrolls the PDF page to the element
       draggableElement.focus();
+
 
       (draggableElement.querySelector('.options-delete') as HTMLElement).onclick = function() {
         draggableElement.remove();
