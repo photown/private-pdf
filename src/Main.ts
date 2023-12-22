@@ -239,19 +239,51 @@ async function loadPdf(fileData: ArrayBuffer) {
     const formInputValues: FormInputValues = new FormInputValues();
 
     // TODO: textarea
-    const textInputElements = (document.getElementById("content") as HTMLElement).querySelectorAll(':not(.draggable) > input[type="text"]');
+    const content = document.getElementById("content") as HTMLElement;
+
+    const textInputElements = content.querySelectorAll(':not(.draggable) > input[type="text"]');
     textInputElements.forEach(function (inputElement) {
       const casted = inputElement as HTMLInputElement;
       console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
       formInputValues.textNameToValue.set(casted.name, casted.value);
     });
 
-    const checkboxInputElements = (document.getElementById("content") as HTMLElement).querySelectorAll(':not(.draggable) > input[type="checkbox"]');
+    const textAreaElements = content.querySelectorAll(':not(.draggable) > textarea');
+    textAreaElements.forEach(function (textAreaElement) {
+      const casted = textAreaElement as HTMLTextAreaElement;
+      console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
+      formInputValues.textNameToValue.set(casted.name, casted.value);
+    });
+
+    const checkboxInputElements = content.querySelectorAll(':not(.draggable) > input[type="checkbox"]');
     checkboxInputElements.forEach(function (inputElement) {
       const casted = inputElement as HTMLInputElement;
       console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
       formInputValues.checkboxNameToValue.set(casted.name, casted.checked);
     });
+
+    const radioInputFields = content.querySelectorAll(':not(.draggable) > input[type="radio"]');
+    const radioGroups: Set<string> = new Set();
+    radioInputFields.forEach(function (inputElement) {
+      const casted = inputElement as HTMLInputElement;
+      radioGroups.add(casted.name);
+    });
+    radioGroups.forEach(function(groupName) {
+      const radioButtons = Array.from(document.getElementsByName(groupName));
+      var selected = radioButtons.findIndex( radioButton => (radioButton as HTMLInputElement).checked);
+      formInputValues.radioGroupNameToSelectedIndex.set(groupName, selected);
+    });
+
+    const selectFields = content.querySelectorAll(':not(.draggable) > select');
+    selectFields.forEach(function(selectElement) {
+      const casted = selectElement as HTMLSelectElement;
+      if (casted.name.startsWith('Dropdown')) {
+        formInputValues.dropdownNameToSelectedIndex.set(casted.name, casted.selectedIndex);
+      } else if (casted.name.startsWith('ListBox')) {
+        formInputValues.optionNameToSelectedIndex.set(casted.name, casted.selectedIndex);
+      }
+    });
+
     return formInputValues;
   }
 
@@ -496,7 +528,6 @@ function downloadBlob(data: Uint8Array, filename: string) {
   document.body.removeChild(link);
 }
 
-// Function to read a file as ArrayBuffer
 function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
       const reader = new FileReader();

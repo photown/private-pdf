@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { degrees, PDFDocument, rgb, StandardFonts, PDFField, PDFFont, PDFImage } from 'pdf-lib';
+import { degrees, PDFDocument, rgb, StandardFonts, PDFField, PDFFont, PDFImage, PDFForm } from 'pdf-lib';
 
 import { PdfDocument } from './PdfDocument';
 import { FormInputValues } from './FormInputValues';
@@ -12,22 +12,8 @@ export class PdfDocumentSaver {
   public async applyChangesAndSave(originalPdfBytes: Uint8Array, formInputValues: FormInputValues, overlays: Overlays): Promise<Uint8Array> {
     const pdfDoc = await PDFDocument.load(originalPdfBytes)
 
-    const form = pdfDoc.getForm();
+    this.populateFormValues(formInputValues, pdfDoc.getForm());
 
-    for (const [key, value] of formInputValues.textNameToValue) {
-        form.getTextField(key).setText(value);
-    }
-
-    for (const [key, value] of formInputValues.checkboxNameToValue) {
-        if (value) {
-            form.getCheckBox(key).check();
-        } else {
-            form.getCheckBox(key).uncheck();
-        }
-    }
-
-    // TODO: empty state handling
-    // TODO: text areas, dropdowns, buttons, option list, radiobuttons
     // TODO: validation
     // TODO: zooming
     // TODO: rotation
@@ -35,17 +21,7 @@ export class PdfDocumentSaver {
     // TODO: refactor
 
     // Fonts
-    const fontValues: string[] = Object.values(StandardFonts);
-    const neededFonts: Map<string, PDFFont> = new Map()
-    for (const pageOverlays of overlays.pagesOverlays.values()) {
-        for (const textOverlay of pageOverlays.textOverlays) {
-            if (fontValues.indexOf(textOverlay.fontFamily) != -1 
-                    && !neededFonts.has(textOverlay.fontFamily)) {
-                const pdfFont = await pdfDoc.embedFont(textOverlay.fontFamily);
-                neededFonts.set(textOverlay.fontFamily, pdfFont);
-            }
-        }
-    }
+    const neededFonts: Map<string, PDFFont> = await this.getNeededFonts(overlays, pdfDoc);
 
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
@@ -88,41 +64,65 @@ export class PdfDocumentSaver {
         }
     }
 
-    const firstPage = pages[0]
-    // Get the width and height of the first page
-    const { width, height } = firstPage.getSize()
-
-console.log("first page height = " + height)
-
-    // Draw a string of text diagonally across the first page
-    console.log("writing text...")
-    firstPage.drawText('y=0', {
-    x: 40,
-    y: 0,
-    size: 14,
-    font: helveticaFont,
-    color: rgb(1, 0, 0),
-    //rotate: degrees(-45),
-    })
-
-    firstPage.drawText(`y=${height}`, {
-    x: 40,
-    y: height,
-    size: 14,
-    font: helveticaFont,
-    color: rgb(1, 0, 0),
-    //rotate: degrees(-45),
-    })
-
-    // firstPage.drawRectangle({
-    //     x: 40,
-    //     y: 40,
-    //     width: 100,
-    //     height: 100,
-    //     borderColor: rgb(1, 0, 0),
-    //     borderWidth: 1.5,
-    //   })
-
     return pdfDoc.save()
   }
+
+    private populateFormValues(formInputValues: FormInputValues, form: PDFForm) {
+        for (const [key, value] of formInputValues.textNameToValue) {
+            form.getTextField(key).setText(value);
+        }
+
+        for (const [key, value] of formInputValues.checkboxNameToValue) {
+            if (value) {
+                form.getCheckBox(key).check();
+            } else {
+                form.getCheckBox(key).uncheck();
+            }
+        }
+
+        for (const [key, value] of formInputValues.dropdownNameToSelectedIndex) {
+            const dropdown = form.getDropdown(key);
+            const options = dropdown.getOptions();
+            if (value < 0 || value >= options.length) {
+                continue;
+            }
+            dropdown.select(options[value]);
+        }
+        
+        for (const [key, value] of formInputValues.optionNameToSelectedIndex) {
+            const optionsList = form.getOptionList(key);
+            const options = optionsList.getOptions();
+            if (value < 0 || value >= options.length) {
+                continue;
+            }
+            console.log("antoan option selected = " + options[value] + " " + value)
+            optionsList.select([options[value]], /* merge = */ false);
+            console.log("antoan option selected getSelected() = " + optionsList.getSelected())
+
+        }
+
+        for (const [key, value] of formInputValues.radioGroupNameToSelectedIndex) {
+            const radioGroup = form.getRadioGroup(key);
+            const options = radioGroup.getOptions();
+            if (value < 0 || value >= options.length) {
+                continue;
+            }
+            radioGroup.select(options[value]);
+        }
+    }
+
+  private async getNeededFonts(overlays: Overlays, pdfDoc: PDFDocument) {
+    const fontValues: string[] = Object.values(StandardFonts);
+    const neededFonts: Map<string, PDFFont> = new Map();
+    for (const pageOverlays of overlays.pagesOverlays.values()) {
+        for (const textOverlay of pageOverlays.textOverlays) {
+            if (fontValues.indexOf(textOverlay.fontFamily) != -1
+                && !neededFonts.has(textOverlay.fontFamily)) {
+                const pdfFont = await pdfDoc.embedFont(textOverlay.fontFamily);
+                neededFonts.set(textOverlay.fontFamily, pdfFont);
+            }
+        }
+    }
+    return neededFonts;
+}
 }
