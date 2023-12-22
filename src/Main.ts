@@ -74,6 +74,7 @@ async function loadPdf(fileData: ArrayBuffer) {
     (document.getElementById('overlayContainer') as HTMLElement ).innerHTML = '';
     (document.querySelector('#current-page') as HTMLElement).innerHTML = '1';
     (document.querySelector('#total-pages') as HTMLElement).innerHTML = '';
+    (document.getElementById("empty-state") as HTMLElement).style.display = 'none';
     disableNavButtons();
     
     let pdfDocumentLoader: PdfDocumentLoader = new PdfDocumentLoader(fileData, {cMapUrl: CMAP_URL, cMapPacked: CMAP_PACKED, enableXfa: ENABLE_XFA})
@@ -169,10 +170,17 @@ async function loadPdf(fileData: ArrayBuffer) {
             <div class="img-container drag-handle">
               <img src="../img/icon_drag.png" draggable="false" />
             </div>
+            <div class="separator"></div>
             <div class="img-container">
               <img src="../img/icon_font_size.png" />
             </div>
             <input type="number" class="fontSize" min="8" max="96" value="14">
+            <div class="separator"></div>
+            <div class="img-container">
+              <img src="../img/icon_text_color.png" />
+            </div>
+            <input type="color" class="fontColor">
+            <div class="separator"></div>
             <div class="img-container">
               <button class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
             </div>
@@ -183,8 +191,8 @@ async function loadPdf(fileData: ArrayBuffer) {
         const newDraggable = draggables[draggables.length-1] as HTMLElement;
         setupDraggable(newDraggable, draggables.length);
 
-        (newDraggable.querySelector('input[type=number].fontSize') as HTMLElement).addEventListener('input', function(event: Event) { handleFontSizeInputChange(event, newDraggable) })
-
+        (newDraggable.querySelector('input[type=number].fontSize') as HTMLElement).addEventListener('input', function(event: Event) { handleFontSizeInputChange(event, newDraggable) });
+        (newDraggable.querySelector('input[type=color].fontColor') as HTMLElement).addEventListener('input', function(event: Event) { handleFontColorInputChange(event, newDraggable) });
     };
 
     (document.getElementById("insert-image") as HTMLElement).onchange = async function() {
@@ -196,6 +204,7 @@ async function loadPdf(fileData: ArrayBuffer) {
             <div class="img-container drag-handle">
               <img src="../img/icon_drag.png" draggable="false" />
             </div>
+            <div class="separator"></div>
             <input type="number" class="scale" min="1" value="100">
             <div class="img-container">
               <button class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
@@ -615,6 +624,13 @@ function handleFontSizeInputChange(event: Event, newDraggable: HTMLElement) {
     (newDraggable.querySelector('input[type=text].text') as HTMLElement).style.fontSize = `${numericValue}px`;
   } else {
     console.log('Invalid Input');
+  }
+}
+
+function handleFontColorInputChange(event: Event, newDraggable: HTMLElement) {
+  const inputValue = (event.target as HTMLInputElement).value;
+  if (inputValue) {
+    (newDraggable.querySelector('input[type=text].text') as HTMLElement).style.color = inputValue;
   }
 }
 
