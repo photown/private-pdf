@@ -14,6 +14,7 @@ export class PdfDocumentSaver {
 
     this.populateFormValues(formInputValues, pdfDoc.getForm());
 
+    // TODO: font color
     // TODO: validation
     // TODO: zooming
     // TODO: rotation
@@ -24,8 +25,6 @@ export class PdfDocumentSaver {
     const neededFonts: Map<string, PDFFont> = await this.getNeededFonts(overlays, pdfDoc);
 
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-    const pages = pdfDoc.getPages()
 
     for (const [pageNumber, pageOverlays] of overlays.pagesOverlays) {
         const page = pdfDoc.getPage(pageNumber-1); // in pdflib pages are 0-based
@@ -96,7 +95,7 @@ export class PdfDocumentSaver {
                 continue;
             }
             console.log("antoan option selected = " + options[value] + " " + value)
-            optionsList.select([options[value]], /* merge = */ false);
+            optionsList.select(options[value]);
             console.log("antoan option selected getSelected() = " + optionsList.getSelected())
 
         }

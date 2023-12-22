@@ -237,28 +237,23 @@ async function loadPdf(fileData: ArrayBuffer) {
 
   function extractFormInputValues() {
     const formInputValues: FormInputValues = new FormInputValues();
-
-    // TODO: textarea
     const content = document.getElementById("content") as HTMLElement;
 
     const textInputElements = content.querySelectorAll(':not(.draggable) > input[type="text"]');
     textInputElements.forEach(function (inputElement) {
       const casted = inputElement as HTMLInputElement;
-      console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
       formInputValues.textNameToValue.set(casted.name, casted.value);
     });
 
     const textAreaElements = content.querySelectorAll(':not(.draggable) > textarea');
     textAreaElements.forEach(function (textAreaElement) {
       const casted = textAreaElement as HTMLTextAreaElement;
-      console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
       formInputValues.textNameToValue.set(casted.name, casted.value);
     });
 
     const checkboxInputElements = content.querySelectorAll(':not(.draggable) > input[type="checkbox"]');
     checkboxInputElements.forEach(function (inputElement) {
       const casted = inputElement as HTMLInputElement;
-      console.log(`creating map, name = ${casted.name}, value = ${casted.value}`);
       formInputValues.checkboxNameToValue.set(casted.name, casted.checked);
     });
 
