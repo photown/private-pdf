@@ -269,7 +269,6 @@ async function loadPdf(fileData: ArrayBuffer) {
       if (selected != null) {
         var minZIndex = calculateSmallestZIndex(radioButtons.map(el => el.parentElement as HTMLElement));
         var adjustedIndex = parseInt(getComputedStyle(selected.parentElement as HTMLElement).zIndex) - minZIndex;
-        console.log("antoan radio selected index is " + adjustedIndex);
         formInputValues.radioGroupNameToSelectedIndex.set(groupName, adjustedIndex);
       }
     });
@@ -277,10 +276,10 @@ async function loadPdf(fileData: ArrayBuffer) {
     const selectFields = content.querySelectorAll(':not(.draggable) > select');
     selectFields.forEach(function(selectElement) {
       const casted = selectElement as HTMLSelectElement;
-      if (casted.name.startsWith('Dropdown')) {
-        formInputValues.dropdownNameToSelectedIndex.set(casted.name, casted.selectedIndex);
-      } else if (casted.name.startsWith('ListBox')) {
+      if (casted.size > 1) {
         formInputValues.optionNameToSelectedIndex.set(casted.name, casted.selectedIndex);
+      } else {
+        formInputValues.dropdownNameToSelectedIndex.set(casted.name, casted.selectedIndex);
       }
     });
 
