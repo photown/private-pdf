@@ -1,217 +1,242 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="google" content="notranslate">
-  <title>PDF.js page viewer using built components</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="google" content="notranslate" />
+    <title>PDF.js page viewer using built components</title>
 
-  <style>
-    :root {
-      --toolbar-height: 65px;
-    }
-    body {
-      background-color: #808080;
-      margin: 0;
-      padding: 0;
-    }
-    #flex-container {
-      display: flex;
-    }
-    #toolbar {
-      height: var(--toolbar-height);
-    }
-    #toolbar-inner {
-      padding: 10px;
-      display: flex;
-      align-items: center;
-    }
-    #pages {
-      display: flex;
-      min-width: 210px;
-      max-height: calc(100vh - var(--toolbar-height));
-      overflow-y: auto;
-      flex-direction: column;
-      align-items: center;
-    }
-    #content {
-      max-height: calc(100vh - var(--toolbar-height));;
-      overflow-y: auto;
-      display: flex;
-      width: 100%;
-    }
-    #pages .page-list-label {
-      text-align: center;
-    }
-    #pages .page-list-container {
-      padding: 25px;
-      align-items: center;
-      display: flex;
-      flex-direction: column;
-    }
-    .page-list-container-selected {
-      background-color: #a6a6c7;
-    }
-    #pageContainer {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #pageContainer .page:not(:first-child) {
-      margin-top: 50px;
-    }
-    #overlayContainer {
-      position:absolute;
-      top:0;
-      left:0;
-      z-index: 100;
-    }
-    #content-inner {
-      position:relative;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #content .draggable {
-      position:absolute;
-    }
-    #overlayContainer input[type=number]::-webkit-inner-spin-button, 
-    #overlayContainer input[type=number]::-webkit-outer-spin-button {  
-      opacity: 1;
-    }
-    #overlayContainer input {
-      font-size: 13px;
-      font-family: Helvetica;
-    }
-    #overlayContainer input[type=text] {
-      padding: 0px;
-      margin: 0px;
-    }
-    #overlayContainer .text-options input[type=number] {
-      width: 36px;
-    }
-    #overlayContainer .draggable {
-      padding: 5px;
-      padding-left: 10px;
-      padding-right: 10px;
-      border-radius: 17px;
-    }
-    #overlayContainer .draggable.focused {
-      background-color: pink;
-    }
-    #overlayContainer .draggable.unfocused {
-      background-color: transparent;
-    }
-    #overlayContainer .draggable.focused .text-options {
-      display: flex;
-    }
-    #overlayContainer .draggable.unfocused .text-options {
-      display: none;
-    }
-    #overlayContainer .draggable.unfocused input[type=text] {
-      background-color: transparent;
-      border: 1px dashed black
-    }
-    #overlayContainer .draggable.focused input[type=text] {
-      background-color: white;
-      border: 1px solid black
-    }
-    #overlayContainer .img-container {
-      display: flex;
-      align-items: center;
-    }
+    <style>
+      :root {
+        --toolbar-height: 65px;
+      }
+      body {
+        background-color: #808080;
+        margin: 0;
+        padding: 0;
+      }
+      #flex-container {
+        display: flex;
+      }
+      #toolbar {
+        height: var(--toolbar-height);
+      }
+      #toolbar-inner {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+      }
+      #pages {
+        display: flex;
+        min-width: 210px;
+        max-height: calc(100vh - var(--toolbar-height));
+        overflow-y: auto;
+        flex-direction: column;
+        align-items: center;
+      }
+      #content {
+        max-height: calc(100vh - var(--toolbar-height));
+        overflow-y: auto;
+        display: flex;
+        width: 100%;
+      }
+      #pages .page-list-label {
+        text-align: center;
+      }
+      #pages .page-list-container {
+        padding: 25px;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+      }
+      .page-list-container-selected {
+        background-color: #a6a6c7;
+      }
+      #pageContainer {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      #pageContainer .page:not(:first-child) {
+        margin-top: 50px;
+      }
+      #overlayContainer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 100;
+      }
+      #content-inner {
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      #content .draggable {
+        position: absolute;
+      }
+      #overlayContainer input[type="number"]::-webkit-inner-spin-button,
+      #overlayContainer input[type="number"]::-webkit-outer-spin-button {
+        opacity: 1;
+      }
+      #overlayContainer input {
+        font-size: 13px;
+        font-family: Helvetica;
+      }
+      #overlayContainer input[type="text"] {
+        padding: 0px;
+        margin: 0px;
+      }
+      #overlayContainer .text-options input[type="number"] {
+        width: 36px;
+      }
+      #overlayContainer .draggable {
+        padding: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 17px;
+      }
+      #overlayContainer .draggable.focused {
+        background-color: pink;
+      }
+      #overlayContainer .draggable.unfocused {
+        background-color: transparent;
+      }
+      #overlayContainer .draggable.focused .text-options {
+        display: flex;
+      }
+      #overlayContainer .draggable.unfocused .text-options {
+        display: none;
+      }
+      #overlayContainer .draggable.unfocused input[type="text"] {
+        background-color: transparent;
+        border: 1px dashed black;
+      }
+      #overlayContainer .draggable.focused input[type="text"] {
+        background-color: white;
+        border: 1px solid black;
+      }
+      #overlayContainer .img-container {
+        display: flex;
+        align-items: center;
+      }
 
-    #overlayContainer .drag-handle {
-      cursor: move;
-    }
-    #pages .page-list-canvas {
-      max-width: 96px
-    }
+      #overlayContainer .drag-handle {
+        cursor: move;
+      }
+      #pages .page-list-canvas {
+        max-width: 96px;
+      }
 
-    #toolbar input[type=file] label {
-      background-color: indigo;
-      color: white;
-      padding: 0.5rem;
-      font-family: sans-serif;
-      border-radius: 0.3rem;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
+      #toolbar input[type="file"] label {
+        background-color: indigo;
+        color: white;
+        padding: 0.5rem;
+        font-family: sans-serif;
+        border-radius: 0.3rem;
+        cursor: pointer;
+        margin-top: 1rem;
+      }
 
-    #toolbar .separator {
-      width:20px;
-      display:inline-block;
-    }
+      #toolbar .separator {
+        width: 20px;
+        display: inline-block;
+      }
 
-    .draggable .separator {
-      width:10px;
-      display:inline-block;
-    }
+      .draggable .separator {
+        width: 10px;
+        display: inline-block;
+      }
 
-    #current-page {
-      width: 25px;
-    }
+      #current-page {
+        width: 25px;
+      }
 
-    #nav-bar {
-      display:flex;
-      flex-direction: row;    
-      align-items: center;
-    }
+      #nav-bar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
 
-    #empty-state {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  </style>
+      #empty-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
 
-  <link rel="stylesheet" href="node_modules/pdfjs-dist/web/pdf_viewer.css">
-</head>
+    <link rel="stylesheet" href="node_modules/pdfjs-dist/web/pdf_viewer.css" />
+  </head>
 
-<body>
-  <div id="toolbar">
-    <div id="toolbar-inner">
-      <input type="file" accept=".pdf" id="pdf-file-input" name="pdf_file" hidden />
-      <button id="pdf-file" onclick="document.getElementById('pdf-file-input').click()" title="Choose a PDF file">
-        <img src="img/button_choose_pdf.png">
-      </button>
-      <button id="save" title="Save the PDF to disk" disabled>
-        <img src="img/button_save.png">
-      </button>
-      <div class="separator"></div>
-      <button id="insert-text" title="Insert text" disabled>
-        <img src="img/button_insert_text.png">
-      </button>
-      <input type="file" accept="image/png, image/jpeg" id="insert-image-input" name="insert-image" hidden />
-      <button id="insert-image" onclick="document.getElementById('insert-image-input').click()" title="Insert image" disabled>
-        <img src="img/button_insert_image.png">
-      </button>
-      <div class="separator"></div>
-      <div id="nav-bar">
-        <button id="previous" title="Go to the previous page" disabled>
-          <img src="img/button_previous_page.png"/>
+  <body>
+    <div id="toolbar">
+      <div id="toolbar-inner">
+        <input
+          type="file"
+          accept=".pdf"
+          id="pdf-file-input"
+          name="pdf_file"
+          hidden
+        />
+        <button
+          id="pdf-file"
+          onclick="document.getElementById('pdf-file-input').click()"
+          title="Choose a PDF file"
+        >
+          <img src="img/button_choose_pdf.png" />
         </button>
-        <input type="text" id="current-page" value="1" disabled> / <span id="total-pages"></span>
-        <button id="next" title="Go to the next page" disabled>
-          <img src="img/button_next_page.png" />
+        <button id="save" title="Save the PDF to disk" disabled>
+          <img src="img/button_save.png" />
         </button>
+        <div class="separator"></div>
+        <button id="insert-text" title="Insert text" disabled>
+          <img src="img/button_insert_text.png" />
+        </button>
+        <input
+          type="file"
+          accept="image/png, image/jpeg"
+          id="insert-image-input"
+          name="insert-image"
+          hidden
+        />
+        <button
+          id="insert-image"
+          onclick="document.getElementById('insert-image-input').click()"
+          title="Insert image"
+          disabled
+        >
+          <img src="img/button_insert_image.png" />
+        </button>
+        <div class="separator"></div>
+        <div id="nav-bar">
+          <button id="previous" title="Go to the previous page" disabled>
+            <img src="img/button_previous_page.png" />
+          </button>
+          <input type="text" id="current-page" value="1" disabled /> /
+          <span id="total-pages"></span>
+          <button id="next" title="Go to the next page" disabled>
+            <img src="img/button_next_page.png" />
+          </button>
+        </div>
       </div>
     </div>
-  </div>   
-  <div id="flex-container">
+    <div id="flex-container">
       <div id="pages"></div>
-      
+
       <div id="content">
         <div id="content-inner">
           <div id="pageContainer" class="pdfViewer singlePageView"></div>
           <div id="overlayContainer"></div>
         </div>
-          
       </div>
-  </div>
-  <div id="empty-state">
-    <div>
-      <a href="#" onclick="document.getElementById('pdf-file-input').click()">Pick a PDF file to modify.</a> Don't worry, it doesn't get uploaded anywhere - it all runs in your browser!
     </div>
-  </div>
+    <div id="empty-state">
+      <div>
+        <a href="#" onclick="document.getElementById('pdf-file-input').click()"
+          >Pick a PDF file to modify.</a
+        >
+        Don't worry, it doesn't get uploaded anywhere - it all runs in your
+        browser!
+      </div>
+    </div>
 
-  <script src="dist/bundle.js" type="module"></script>
-</body>
+    <script src="dist/bundle.js" type="module"></script>
+  </body>
 </html>
