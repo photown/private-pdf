@@ -103,6 +103,7 @@ export class PdfDocumentSaver {
         for (const [key, value] of formInputValues.radioGroupNameToSelectedIndex) {
             const radioGroup = form.getRadioGroup(key);
             const options = radioGroup.getOptions();
+            console.log("antoan radio options are " + options);
             if (value < 0 || value >= options.length) {
                 continue;
             }

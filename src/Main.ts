@@ -265,8 +265,13 @@ async function loadPdf(fileData: ArrayBuffer) {
     });
     radioGroups.forEach(function(groupName) {
       const radioButtons = Array.from(document.getElementsByName(groupName));
-      var selected = radioButtons.findIndex( radioButton => (radioButton as HTMLInputElement).checked);
-      formInputValues.radioGroupNameToSelectedIndex.set(groupName, selected);
+      var selected = radioButtons.find( radioButton => (radioButton as HTMLInputElement).checked);
+      if (selected != null) {
+        var minZIndex = calculateSmallestZIndex(radioButtons.map(el => el.parentElement as HTMLElement));
+        var adjustedIndex = parseInt(getComputedStyle(selected.parentElement as HTMLElement).zIndex) - minZIndex;
+        console.log("antoan radio selected index is " + adjustedIndex);
+        formInputValues.radioGroupNameToSelectedIndex.set(groupName, adjustedIndex);
+      }
     });
 
     const selectFields = content.querySelectorAll(':not(.draggable) > select');
@@ -280,6 +285,10 @@ async function loadPdf(fileData: ArrayBuffer) {
     });
 
     return formInputValues;
+  }
+
+  function calculateSmallestZIndex(collection: Array<HTMLElement>): number {
+    return Math.min(...Array.from(collection, el => parseInt(getComputedStyle(el).zIndex)));
   }
 
   function extractOverlays(): Overlays {
