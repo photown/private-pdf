@@ -14,7 +14,6 @@ export class PdfDocumentSaver {
 
     this.populateFormValues(formInputValues, pdfDoc.getForm());
 
-    // TODO: font color
     // TODO: validation
     // TODO: zooming
     // TODO: rotation

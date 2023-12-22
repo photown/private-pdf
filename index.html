@@ -1,23 +1,7 @@
 <!DOCTYPE html>
-<!--
-Copyright 2014 Mozilla Foundation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-<html dir="ltr" mozdisallowselectionprint>
+<html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="google" content="notranslate">
   <title>PDF.js page viewer using built components</title>
 
@@ -43,7 +27,7 @@ limitations under the License.
     }
     #pages {
       display: flex;
-      width: 210px;
+      min-width: 210px;
       max-height: calc(100vh - var(--toolbar-height));
       overflow-y: auto;
       flex-direction: column;
@@ -53,7 +37,6 @@ limitations under the License.
       max-height: calc(100vh - var(--toolbar-height));;
       overflow-y: auto;
       display: flex;
-      justify-content: center;
       width: 100%;
     }
     #pages .page-list-label {
@@ -68,6 +51,10 @@ limitations under the License.
     .page-list-container-selected {
       background-color: #a6a6c7;
     }
+    #pageContainer {
+      margin-left: auto;
+      margin-right: auto;
+    }
     #pageContainer .page:not(:first-child) {
       margin-top: 50px;
     }
@@ -79,6 +66,8 @@ limitations under the License.
     }
     #content-inner {
       position:relative;
+      margin-left: auto;
+      margin-right: auto;
     }
     #content .draggable {
       position:absolute;
