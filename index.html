@@ -160,6 +160,12 @@ limitations under the License.
       flex-direction: row;    
       align-items: center;
     }
+
+    #empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 
   <link rel="stylesheet" href="node_modules/pdfjs-dist/web/pdf_viewer.css">
@@ -168,28 +174,28 @@ limitations under the License.
 <body>
   <div id="toolbar">
     <div id="toolbar-inner">
-      <input type="file" accept=".pdf" id="pdf_file" name="pdf_file" hidden />
-      <button onclick="document.getElementById('pdf_file').click()" alt="Choose a PDF file">
+      <input type="file" accept=".pdf" id="pdf-file-input" name="pdf_file" hidden />
+      <button id="pdf-file" onclick="document.getElementById('pdf-file-input').click()" title="Choose a PDF file">
         <img src="img/button_choose_pdf.png">
       </button>
-      <button id="save" alt="Save the PDF to disk">
+      <button id="save" title="Save the PDF to disk" disabled>
         <img src="img/button_save.png">
       </button>
       <div class="separator"></div>
-      <button id="insert-text" alt="Insert text">
+      <button id="insert-text" title="Insert text" disabled>
         <img src="img/button_insert_text.png">
       </button>
-      <input type="file" accept="image/png, image/jpeg" id="insert-image" name="insert-image" hidden />
-      <button onclick="document.getElementById('insert-image').click()" alt="Insert image">
+      <input type="file" accept="image/png, image/jpeg" id="insert-image-input" name="insert-image" hidden />
+      <button id="insert-image" onclick="document.getElementById('insert-image-input').click()" title="Insert image" disabled>
         <img src="img/button_insert_image.png">
       </button>
       <div class="separator"></div>
       <div id="nav-bar">
-        <button id="previous" alt="Go to the previous page">
+        <button id="previous" title="Go to the previous page" disabled>
           <img src="img/button_previous_page.png"/>
         </button>
-        <input type="text" id="current-page" value="1"> / <span id="total-pages"></span>
-        <button id="next" alt="Go to the next page">
+        <input type="text" id="current-page" value="1" disabled> / <span id="total-pages"></span>
+        <button id="next" title="Go to the next page" disabled>
           <img src="img/button_next_page.png" />
         </button>
       </div>
@@ -201,13 +207,15 @@ limitations under the License.
       <div id="content">
         <div id="content-inner">
           <div id="pageContainer" class="pdfViewer singlePageView"></div>
-          <div id="overlayContainer">
-            
-          
-          </div>
+          <div id="overlayContainer"></div>
         </div>
           
       </div>
+  </div>
+  <div id="empty-state">
+    <div>
+      <a href="#" onclick="document.getElementById('pdf-file-input').click()">Pick a PDF file to modify.</a> Don't worry, it doesn't get uploaded anywhere - it all runs in your browser!
+    </div>
   </div>
 
   <script src="dist/bundle.js" type="module"></script>

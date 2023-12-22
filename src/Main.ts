@@ -34,8 +34,8 @@ const pageListContainer: HTMLDivElement = document.getElementById("pages") as HT
 
 var currentPage = 1;
 
-(document.getElementById("pdf_file") as HTMLElement).onchange = async function() {
-  const input = document.getElementById("pdf_file") as HTMLInputElement
+(document.getElementById("pdf-file-input") as HTMLElement).onchange = async function() {
+  const input = document.getElementById("pdf-file-input") as HTMLInputElement
   console.log(input.files)
   if (input.files && input.files.length > 0) {
     await readFileAsArrayBuffer(input.files[0])
@@ -45,7 +45,7 @@ var currentPage = 1;
   }
 };
 
-downloadAndLoadPdf(DEFAULT_URL);
+//downloadAndLoadPdf(DEFAULT_URL);
 
 function downloadAndLoadPdf(url: string) {
   fetch(url)
@@ -74,6 +74,7 @@ async function loadPdf(fileData: ArrayBuffer) {
     (document.getElementById('overlayContainer') as HTMLElement ).innerHTML = '';
     (document.querySelector('#current-page') as HTMLElement).innerHTML = '1';
     (document.querySelector('#total-pages') as HTMLElement).innerHTML = '';
+    disableNavButtons();
     
     let pdfDocumentLoader: PdfDocumentLoader = new PdfDocumentLoader(fileData, {cMapUrl: CMAP_URL, cMapPacked: CMAP_PACKED, enableXfa: ENABLE_XFA})
 
@@ -114,6 +115,8 @@ async function loadPdf(fileData: ArrayBuffer) {
         }
       });
     }
+
+    enableNavButtons();
 
     (document.getElementById("next") as HTMLElement).onclick = function() {
       if (currentPage + 1 <= pdfDocument.getPageCount()) {
@@ -460,6 +463,26 @@ async function loadPdf(fileData: ArrayBuffer) {
       if (currentPage != currentScrollPage) {
         gotoPage(pdfDocument, currentScrollPage, false);
       }
+    }
+
+    function enableNavButtons() {
+      (document.getElementById('pdf-file') as HTMLElement).removeAttribute('disabled');
+      (document.getElementById('save') as HTMLElement).removeAttribute('disabled');
+      (document.getElementById('insert-text') as HTMLElement).removeAttribute('disabled');
+      (document.getElementById('insert-image') as HTMLElement).removeAttribute('disabled');
+      (document.getElementById('previous') as HTMLElement).removeAttribute('disabled');
+      (document.getElementById('current-page') as HTMLElement).removeAttribute('disabled');
+      (document.getElementById('next') as HTMLElement).removeAttribute('disabled');
+    }
+    
+    function disableNavButtons() {
+      (document.getElementById('pdf-file') as HTMLElement).setAttribute('disabled', "true");
+      (document.getElementById('save') as HTMLElement).setAttribute('disabled', "true");
+      (document.getElementById('insert-text') as HTMLElement).setAttribute('disabled', "true");
+      (document.getElementById('insert-image') as HTMLElement).setAttribute('disabled', "true");
+      (document.getElementById('previous') as HTMLElement).setAttribute('disabled', "true");
+      (document.getElementById('current-page') as HTMLElement).setAttribute('disabled', "true");
+      (document.getElementById('next') as HTMLElement).setAttribute('disabled', "true");
     }
 }
 
