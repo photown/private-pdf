@@ -1,16 +1,15 @@
 import * as pdfjsLib from "pdfjs-dist";
 
-import { PdfDocumentLoader } from "./PdfDocumentLoader";
-import { PdfDocument } from "./PdfDocument";
-import { PdfPage } from "./PdfPage";
+import { baselineRatio } from "./BaselineRatio";
+import { ColorUtils } from "./ColorUtils";
 import { FormInputValues } from "./FormInputValues";
+import { PdfDocument } from "./PdfDocument";
+import { PdfDocumentLoader } from "./PdfDocumentLoader";
+import { PdfPage } from "./PdfPage";
+import { ImageOverlay, ImageType } from "./overlays/ImageOverlay";
 import { Overlays } from "./overlays/Overlays";
 import { PageOverlays } from "./overlays/PageOverlays";
 import { TextOverlay } from "./overlays/TextOverlay";
-import { ColorUtils } from "./ColorUtils";
-import { RGB } from "./RGB";
-import { baselineRatio } from "./BaselineRatio";
-import { ImageOverlay, ImageType } from "./overlays/ImageOverlay";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "../node_modules/pdfjs-dist/build/pdf.worker.js";

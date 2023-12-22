@@ -1,20 +1,17 @@
-import * as pdfjsLib from "pdfjs-dist";
 import {
-  degrees,
   PDFDocument,
-  rgb,
-  StandardFonts,
-  PDFField,
   PDFFont,
-  PDFImage,
   PDFForm,
+  PDFImage,
   PDFPage,
+  StandardFonts,
+  degrees,
+  rgb,
 } from "pdf-lib";
 
-import { PdfDocument } from "./PdfDocument";
 import { FormInputValues } from "./FormInputValues";
-import { Overlays } from "./overlays/Overlays";
 import { ImageType } from "./overlays/ImageOverlay";
+import { Overlays } from "./overlays/Overlays";
 import { PageOverlays } from "./overlays/PageOverlays";
 
 export class PdfDocumentSaver {
