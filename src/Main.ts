@@ -171,7 +171,7 @@ async function loadPdf(fileData: ArrayBuffer) {
             </div>
             <input type="number" class="fontSize" min="8" max="96" value="14">
             <div class="img-container">
-              <button id="field1-delete" class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+              <button class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
             </div>
           </div>
         </div>
@@ -195,7 +195,7 @@ async function loadPdf(fileData: ArrayBuffer) {
             </div>
             <input type="number" class="scale" min="1" value="100">
             <div class="img-container">
-              <button id="field1-delete" class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+              <button class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
             </div>
           </div>
         </div>
@@ -368,7 +368,11 @@ async function loadPdf(fileData: ArrayBuffer) {
     function setupDraggable(draggableElement: HTMLElement) {
       let offsetX: number, offsetY: number;
 
-      draggableElement.focus()
+      draggableElement.focus();
+
+      (draggableElement.querySelector('.options-delete') as HTMLElement).onclick = function() {
+        draggableElement.remove();
+      }
 
       const mouseDownListener = function (event: MouseEvent) {
         console.log("mouse down!")

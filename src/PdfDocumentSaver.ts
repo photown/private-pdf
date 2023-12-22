@@ -26,8 +26,14 @@ export class PdfDocumentSaver {
         }
     }
 
-    // TODO: text areas, dropdowns, buttons, option list, radiobuttons, signature
+    // TODO: placing draggables
+    // TODO: empty state handling
+    // TODO: text areas, dropdowns, buttons, option list, radiobuttons
     // TODO: validation
+    // TODO: zooming
+    // TODO: rotation
+    // TODO: use Bootstrap for styling
+    // TODO: refactor
 
     // Fonts
     const fontValues: string[] = Object.values(StandardFonts);
