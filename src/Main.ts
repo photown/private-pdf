@@ -328,6 +328,13 @@ async function loadPdf(fileData: ArrayBuffer) {
     checkElementInView
   );
 
+  window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
+    const confirmationMessage =
+      "If you leave this page, all changes in your PDF will be lost. Are you sure?";
+    (e || window.event).returnValue = confirmationMessage; // Gecko + IE
+    return confirmationMessage; // Gecko + Webkit, Safari, Chrome, etc.
+  });
+
   function extractFormInputValues() {
     const formInputValues: FormInputValues = new FormInputValues();
     const content = document.getElementById("content") as HTMLElement;

@@ -28,7 +28,6 @@ export class PdfDocumentSaver {
     this.populateFormValues(formInputValues, pdfDoc.getForm());
 
     // TODO: validation
-    // TODO: rotation
     // TODO: refactor
 
     const neededFonts: Map<string, PDFFont> = await this.getNeededFonts(
@@ -46,15 +45,19 @@ export class PdfDocumentSaver {
     }
 
     if (rotateBy != 0) {
-      for (var i = 0; i < pdfDoc.getPageCount(); i++) {
-        const page = pdfDoc.getPage(i); // in pdflib pages are 0-based
-        var newRotation = (page.getRotation().angle + rotateBy) % 360;
-        newRotation = newRotation >= 0 ? newRotation : newRotation + 360;
-        page.setRotation(degrees(newRotation));
-      }
+      this.rotatePages(pdfDoc, rotateBy);
     }
 
     return pdfDoc.save();
+  }
+
+  private rotatePages(pdfDoc: PDFDocument, rotateBy: number) {
+    for (var i = 0; i < pdfDoc.getPageCount(); i++) {
+      const page = pdfDoc.getPage(i); // in pdflib pages are 0-based
+      var newRotation = (page.getRotation().angle + rotateBy) % 360;
+      newRotation = newRotation >= 0 ? newRotation : newRotation + 360;
+      page.setRotation(degrees(newRotation));
+    }
   }
 
   private async embedImages(
