@@ -109,8 +109,7 @@ async function loadPdf(fileData: ArrayBuffer) {
           .then(function (page: PdfPage) {
             page.renderThumbnail(
               entry.target as HTMLCanvasElement,
-              THUMBNAIL_MAX_SIZE,
-              /* rotation = */ 0
+              THUMBNAIL_MAX_SIZE
             );
           })
           .then(function () {
@@ -175,6 +174,33 @@ async function loadPdf(fileData: ArrayBuffer) {
       }
     }
   );
+
+  (document.getElementById("rotate") as HTMLElement).onclick =
+    async function () {
+      const formInputValues: FormInputValues = extractFormInputValues();
+      const overlays: Overlays = extractOverlays();
+
+      console.log(
+        "antoan overlays.pagesOverlays.size =",
+        overlays.pagesOverlays.size
+      );
+
+      if (
+        overlays.pagesOverlays.size > 0 &&
+        !confirm(
+          "You won't be able to edit the text and/or images you've added after rotating the PDF. Proceed anyway?"
+        )
+      ) {
+        return;
+      }
+
+      const savedBytes = await pdfDocument.savePdf(
+        formInputValues,
+        overlays,
+        90
+      );
+      loadPdf(savedBytes);
+    };
 
   (document.getElementById("save") as HTMLElement).onclick = async function () {
     console.log("save clicked");
@@ -385,14 +411,8 @@ async function loadPdf(fileData: ArrayBuffer) {
 
   function extractOverlays(): Overlays {
     const overlays: Overlays = new Overlays();
-
     const draggables = document.querySelectorAll(".draggable");
-
     const pageOverlaysMap: Map<number, PageOverlays> = new Map();
-    for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
-      const pageOverlays: PageOverlays = new PageOverlays();
-      pageOverlaysMap.set(i, pageOverlays);
-    }
 
     draggables.forEach(function (draggable: Element) {
       if (draggable.classList.contains("text")) {
@@ -403,7 +423,10 @@ async function loadPdf(fileData: ArrayBuffer) {
     });
 
     for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
-      overlays.pagesOverlays.set(i, pageOverlaysMap.get(i) as PageOverlays);
+      const pageOverlays = pageOverlaysMap.get(i);
+      if (pageOverlays) {
+        overlays.pagesOverlays.set(i, pageOverlaysMap.get(i) as PageOverlays);
+      }
     }
 
     return overlays;
@@ -493,6 +516,9 @@ async function loadPdf(fileData: ArrayBuffer) {
           (page.offsetHeight - offsetTop + page.offsetTop) *
             originalToActualRatio -
           height;
+        if (!pageOverlaysMap.has(pageNumber)) {
+          pageOverlaysMap.set(pageNumber, new PageOverlays());
+        }
         (pageOverlaysMap.get(pageNumber) as PageOverlays).imageOverlays.push(
           imageOverlay
         );
@@ -590,6 +616,9 @@ async function loadPdf(fileData: ArrayBuffer) {
           (offsetTop + textInputCasted.offsetHeight - page.offsetTop);
         textOverlay.transform.y =
           (p2 + p2 / page.offsetHeight) * originalToActualRatio;
+        if (!pageOverlaysMap.has(pageNumber)) {
+          pageOverlaysMap.set(pageNumber, new PageOverlays());
+        }
         (pageOverlaysMap.get(pageNumber) as PageOverlays).textOverlays.push(
           textOverlay
         );
@@ -746,6 +775,9 @@ async function loadPdf(fileData: ArrayBuffer) {
     (document.getElementById("next") as HTMLElement).removeAttribute(
       "disabled"
     );
+    (document.getElementById("rotate") as HTMLElement).removeAttribute(
+      "disabled"
+    );
   }
 
   function disableNavButtons() {
@@ -774,6 +806,10 @@ async function loadPdf(fileData: ArrayBuffer) {
       "true"
     );
     (document.getElementById("next") as HTMLElement).setAttribute(
+      "disabled",
+      "true"
+    );
+    (document.getElementById("rotate") as HTMLElement).setAttribute(
       "disabled",
       "true"
     );

@@ -20,7 +20,8 @@ export class PdfDocumentSaver {
   public async applyChangesAndSave(
     originalPdfBytes: Uint8Array,
     formInputValues: FormInputValues,
-    overlays: Overlays
+    overlays: Overlays,
+    rotateBy: number
   ): Promise<Uint8Array> {
     const pdfDoc = await PDFDocument.load(originalPdfBytes);
 
@@ -41,7 +42,16 @@ export class PdfDocumentSaver {
       const page = pdfDoc.getPage(pageNumber - 1); // in pdflib pages are 0-based
 
       this.doTextDrawing(pageOverlays, page, neededFonts, helveticaFont);
-      this.doImageDrawing(pageOverlays, pdfDoc, page, base64ToPdfImageMap);
+      this.doImageDrawing(pageOverlays, page, base64ToPdfImageMap);
+    }
+
+    if (rotateBy != 0) {
+      for (var i = 0; i < pdfDoc.getPageCount(); i++) {
+        const page = pdfDoc.getPage(i); // in pdflib pages are 0-based
+        var newRotation = (page.getRotation().angle + rotateBy) % 360;
+        newRotation = newRotation >= 0 ? newRotation : newRotation + 360;
+        page.setRotation(degrees(newRotation));
+      }
     }
 
     return pdfDoc.save();
@@ -52,7 +62,7 @@ export class PdfDocumentSaver {
     pdfDoc: PDFDocument
   ): Promise<Map<string, PDFImage>> {
     const base64ToPdfImageMap: Map<string, PDFImage> = new Map();
-    for (const [pageNumber, pageOverlays] of overlays.pagesOverlays) {
+    for (const [, pageOverlays] of overlays.pagesOverlays) {
       for (const imageOverlay of pageOverlays.imageOverlays) {
         if (base64ToPdfImageMap.has(imageOverlay.base64)) {
           continue;
@@ -77,7 +87,6 @@ export class PdfDocumentSaver {
 
   private async doImageDrawing(
     pageOverlays: PageOverlays,
-    pdfDoc: PDFDocument,
     page: PDFPage,
     base64ToPdfImageMap: Map<string, PDFImage>
   ) {

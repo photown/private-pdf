@@ -30,14 +30,9 @@ export class PdfPage {
     pdfPageView.draw();
   }
 
-  public async renderThumbnail(
-    canvas: HTMLCanvasElement,
-    maxSizePx: number,
-    rotation: number
-  ) {
+  public async renderThumbnail(canvas: HTMLCanvasElement, maxSizePx: number) {
     const defaultViewPort = this.pdfPageProxy.getViewport({
       scale: 1,
-      rotation: rotation,
     });
     if (defaultViewPort.width > defaultViewPort.height) {
       canvas.width = maxSizePx;
@@ -60,7 +55,6 @@ export class PdfPage {
         canvasContext: context2d,
         viewport: this.pdfPageProxy.getViewport({
           scale: scale,
-          rotation: rotation,
         }),
       });
     }

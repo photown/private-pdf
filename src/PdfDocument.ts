@@ -25,7 +25,8 @@ export class PdfDocument {
 
   public async savePdf(
     formInputValues: FormInputValues,
-    overlays: Overlays
+    overlays: Overlays,
+    rotateBy: number = 0
   ): Promise<Uint8Array> {
     // This is the original PDF that was read
     const pdfBytes = await this.pdfDocumentProxy.saveDocument();
@@ -34,7 +35,8 @@ export class PdfDocument {
     return new PdfDocumentSaver().applyChangesAndSave(
       pdfBytes,
       formInputValues,
-      overlays
+      overlays,
+      rotateBy
     );
   }
 
