@@ -94,8 +94,7 @@ function onPageLoad() {
 
     let pdfDocument: PdfDocument = await pdfDocumentLoader.load();
 
-    (document.querySelector("#total-pages") as HTMLElement).innerHTML =
-      pdfDocument.getPageCount().toString();
+    view.setTotalPages(parseInt(pdfDocument.getPageCount().toString()));
 
     const thumbnailShownObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -124,9 +123,15 @@ function onPageLoad() {
       });
     });
 
-    createThumbnailPlaceholders(pdfDocument, thumbnailShownObserver);
+    view.createThumbnailPlaceholders(
+      pdfDocument.getPageCount(),
+      thumbnailShownObserver,
+      function (pageNumber: number) {
+        gotoPage(pageNumber);
+      }
+    );
 
-    gotoPage(pdfDocument, currentPage, false);
+    gotoPage(currentPage, /* scrollToPage = */ false);
 
     for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
       await pdfDocument.loadPage(i).then(function (pdfPage: PdfPage) {
@@ -145,13 +150,13 @@ function onPageLoad() {
 
     view.setOnNextClickedListener(function () {
       if (currentPage + 1 <= pdfDocument.getPageCount()) {
-        gotoPage(pdfDocument, currentPage + 1);
+        gotoPage(currentPage + 1);
       }
     });
 
     view.setOnPreviousClickedListener(function () {
       if (currentPage - 1 >= 1) {
-        gotoPage(pdfDocument, currentPage - 1);
+        gotoPage(currentPage - 1);
       }
     });
 
@@ -170,7 +175,7 @@ function onPageLoad() {
       const inputValue = input.value;
       const page = parseFloat(inputValue);
       if (!isNaN(page) && page > 0 && page <= pdfDocument.getPageCount()) {
-        gotoPage(pdfDocument, page);
+        gotoPage(page);
       }
     });
 
@@ -201,14 +206,18 @@ function onPageLoad() {
 
       const bytes = await pdfDocument.savePdf(formInputValues, overlays);
 
-      downloadBlob(bytes, "testfile");
+      view.downloadBlob(bytes, "testfile");
     });
 
     view.setOnInsertTextClickListener();
 
     view.setOnInsertImageInputListener(validateBase64);
 
-    view.setOnContentScrollEventListener(checkElementInView);
+    view.setOnContentScrollEventListener(function (currentScrollPage: number) {
+      if (currentPage != currentScrollPage) {
+        gotoPage(currentScrollPage, false);
+      }
+    });
 
     window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
       const confirmationMessage =
@@ -449,117 +458,9 @@ function onPageLoad() {
       return [x, y];
     }
 
-    function checkElementInView() {
-      console.log("checking scroll...");
-      // Iterate through each element and check its position
-      const elements = document.querySelectorAll(".page");
-      var currentScrollPage = currentPage;
-      const content = view.content;
-
-      var minDist = Number.MAX_VALUE;
-      elements?.forEach((element, index) => {
-        const casted = element as HTMLElement;
-        const dist = Math.abs(
-          -content.scrollTop +
-            casted.offsetTop +
-            casted.offsetHeight / 2 -
-            content.offsetHeight / 2
-        );
-
-        if (index == 1) {
-          console.log(
-            `scrollTop = ${content.scrollTop}, offsetTop = ${casted.offsetTop}, offsetHeight=${casted.offsetHeight}, contentHeight=${content.offsetHeight}`
-          );
-          console.log("dist = " + dist + " current min dist = " + minDist);
-        }
-        if (minDist > dist) {
-          minDist = dist;
-          console.log(`Element ${element.id} is in view.`);
-          currentScrollPage = index + 1;
-        }
-      });
-
-      console.log("current closest page is " + currentScrollPage);
-      if (currentPage != currentScrollPage) {
-        gotoPage(pdfDocument, currentScrollPage, false);
-      }
-    }
-
-    function downloadBlob(data: Uint8Array, filename: string) {
-      const blob = new Blob([data], { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    function createThumbnailPlaceholders(
-      pdfDocument: PdfDocument,
-      thumbnailShownObserver: IntersectionObserver
-    ) {
-      for (let i = 1; i <= pdfDocument.getPageCount(); i++) {
-        const div = document.createElement("div");
-        div.classList.add("page-list-container");
-
-        div.onclick = () => gotoPage(pdfDocument, i);
-
-        const label = document.createElement("div");
-        label.classList.add("page-list-label");
-        label.innerHTML = `${i}`;
-
-        const canvas = document.createElement("canvas");
-        canvas.classList.add("page-list-canvas");
-        canvas.setAttribute("data-pagenumber", `${i}`);
-
-        div.append(canvas);
-        div.append(label);
-
-        view.pageListContainer.appendChild(div);
-        thumbnailShownObserver.observe(canvas);
-      }
-    }
-
-    function gotoPage(
-      pdfDocument: PdfDocument,
-      pageNumber: number,
-      scrollToPage: boolean = true
-    ) {
-      const previousPageElement = document.querySelector(
-        `.page-list-container:nth-child(${currentPage})`
-      ) as HTMLElement | null;
-      if (previousPageElement) {
-        previousPageElement.classList.remove("page-list-container-selected");
-      }
-
+    function gotoPage(pageNumber: number, scrollToPage: boolean = true) {
+      view.gotoPage(pageNumber, currentPage, scrollToPage);
       currentPage = pageNumber;
-      (document.querySelector("#current-page") as HTMLInputElement).value =
-        currentPage.toString();
-
-      const nthElement = document.querySelector(
-        `.page-list-container:nth-child(${currentPage})`
-      ) as HTMLElement | null;
-      if (nthElement) {
-        nthElement.classList.add("page-list-container-selected");
-      }
-
-      nthElement?.scrollIntoView({
-        block: "nearest",
-      });
-
-      if (scrollToPage) {
-        const pageElement = document.querySelector(
-          `.page:nth-child(${currentPage})`
-        ) as HTMLElement | null;
-        if (pageElement != null) {
-          pageElement.scrollIntoView({
-            block: "start", // Scroll to the start of the target element
-          });
-        } else {
-          console.log("page element null");
-        }
-      }
     }
   }
 }

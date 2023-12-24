@@ -95,10 +95,36 @@ export class View {
       onClickListener;
   }
 
-  public setOnContentScrollEventListener(scrollEvent: () => void) {
+  public setOnContentScrollEventListener(
+    scrollEvent: (currentPage: number) => void
+  ) {
+    const that = this;
     (document.getElementById("content") as HTMLElement).addEventListener(
       "scroll",
-      scrollEvent
+      function () {
+        // Iterate through each element and check its position
+        const elements = document.querySelectorAll(".page");
+        var currentScrollPage = -1;
+        const content = that.content;
+
+        var minDist = Number.MAX_VALUE;
+        elements?.forEach((element, index) => {
+          const casted = element as HTMLElement;
+          const dist = Math.abs(
+            -content.scrollTop +
+              casted.offsetTop +
+              casted.offsetHeight / 2 -
+              content.offsetHeight / 2
+          );
+
+          if (minDist > dist) {
+            minDist = dist;
+            currentScrollPage = index + 1;
+          }
+        });
+
+        scrollEvent(currentScrollPage);
+      }
     );
   }
 
@@ -340,6 +366,88 @@ export class View {
     });
 
     return formInputValues;
+  }
+
+  public setTotalPages(totalPages: number) {
+    (document.querySelector("#total-pages") as HTMLElement).innerHTML =
+      totalPages.toString();
+  }
+
+  public downloadBlob(data: Uint8Array, filename: string) {
+    const blob = new Blob([data], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  public createThumbnailPlaceholders(
+    numThumbnails: number,
+    thumbnailShownObserver: IntersectionObserver,
+    onThumbnailClick: (pageNumber: number) => void
+  ) {
+    for (let i = 1; i <= numThumbnails; i++) {
+      const div = document.createElement("div");
+      div.classList.add("thumbnail-list-container");
+
+      div.onclick = () => onThumbnailClick(i);
+
+      const label = document.createElement("div");
+      label.classList.add("thumbnail-list-label");
+      label.innerHTML = `${i}`;
+
+      const canvas = document.createElement("canvas");
+      canvas.classList.add("thumbnail-list-canvas");
+      canvas.setAttribute("data-pagenumber", `${i}`);
+
+      div.append(canvas);
+      div.append(label);
+
+      this.pageListContainer.appendChild(div);
+      thumbnailShownObserver.observe(canvas);
+    }
+  }
+
+  public gotoPage(
+    pageNumber: number,
+    oldPage: number,
+    scrollToPage: boolean = true
+  ) {
+    const previousPageElement = document.querySelector(
+      `.thumbnail-list-container:nth-child(${oldPage})`
+    ) as HTMLElement | null;
+    if (previousPageElement) {
+      previousPageElement.classList.remove("thumbnail-list-container-selected");
+    }
+
+    (document.querySelector("#current-page") as HTMLInputElement).value =
+      pageNumber.toString();
+
+    const nthElement = document.querySelector(
+      `.thumbnail-list-container:nth-child(${pageNumber})`
+    ) as HTMLElement | null;
+    if (nthElement) {
+      nthElement.classList.add("thumbnail-list-container-selected");
+    }
+
+    nthElement?.scrollIntoView({
+      block: "nearest",
+    });
+
+    if (scrollToPage) {
+      const pageElement = document.querySelector(
+        `.page:nth-child(${pageNumber})`
+      ) as HTMLElement | null;
+      if (pageElement != null) {
+        pageElement.scrollIntoView({
+          block: "start", // Scroll to the start of the target element
+        });
+      } else {
+        console.log("page element null");
+      }
+    }
   }
 
   private calculateSmallestZIndex(collection: Array<HTMLElement>): number {
