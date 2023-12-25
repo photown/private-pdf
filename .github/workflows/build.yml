@@ -46,6 +46,8 @@ jobs:
         ls -l
         git checkout --orphan gh-pages
         git rm -rf src
+        git rm -rf node_modules
+        git rm -rf build
         git rm -rf .gitignore
         git add .
         git add -f dist
