@@ -40,14 +40,17 @@ jobs:
       run: |
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
-        echo "printing git status"
+        echo "printing git status 1"
         git status
         echo "printing ls"
         ls -l
         git checkout --orphan gh-pages
+         echo "printing git status 2"
+        git status
         git rm -rf src
         # git rm -rf node_modules
         git rm -rf .gitignore
+        git add -f node_modules/pdfjs-dist
         # git add .
         git add -f dist
         git add -f index.html
