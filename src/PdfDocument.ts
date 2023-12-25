@@ -7,7 +7,11 @@ import { FormInputValues } from "./FormInputValues";
 import { Overlays } from "./overlays/Overlays";
 
 export class PdfDocument {
-  constructor(private readonly pdfDocumentProxy: pdfjsLib.PDFDocumentProxy) {}
+  private pageCache: Map<number, PdfPage>;
+
+  constructor(private readonly pdfDocumentProxy: pdfjsLib.PDFDocumentProxy) {
+    this.pageCache = new Map();
+  }
 
   public async loadPage(pageNumber: number): Promise<PdfPage> {
     if (pageNumber < 1 || pageNumber > this.getPageCount()) {
@@ -17,10 +21,11 @@ export class PdfDocument {
     }
     return this.pdfDocumentProxy
       .getPage(pageNumber)
-      .then(
-        (result: pdfjsLib.PDFPageProxy) =>
-          new PdfPage(result, pageNumber, new EventBus())
-      );
+      .then((result: pdfjsLib.PDFPageProxy) => {
+        const pdfPage = new PdfPage(result, pageNumber, new EventBus());
+        this.pageCache.set(pageNumber, pdfPage);
+        return pdfPage;
+      });
   }
 
   public async savePdf(
@@ -38,6 +43,14 @@ export class PdfDocument {
       overlays,
       rotateBy
     );
+  }
+
+  public getCachedPage(pageNumber: number): PdfPage | null {
+    if (!this.pageCache.has(pageNumber)) {
+      console.log(`Page number ${pageNumber} not in cache, aborting...`);
+      return null;
+    }
+    return this.pageCache.get(pageNumber) || null;
   }
 
   public getPageCount() {

@@ -11,6 +11,7 @@ import { Overlays } from "./overlays/Overlays";
 import { PageOverlays } from "./overlays/PageOverlays";
 import { TextOverlay } from "./overlays/TextOverlay";
 import { View } from "./View";
+import { Transform } from "./overlays/Transform";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "../node_modules/pdfjs-dist/build/pdf.worker.js";
@@ -297,6 +298,13 @@ function onPageLoad() {
         const pagesToIncludeImage = getPagesToInclude(pages, draggable);
 
         for (const pageNumber of pagesToIncludeImage) {
+          const pdfPage = pdfDocument.getCachedPage(pageNumber);
+          if (pdfPage == null) {
+            console.log(
+              `Could not retrieve page ${pageNumber} for text overlay, aborting...`
+            );
+            continue;
+          }
           const page = pages[pageNumber - 1] as HTMLElement;
 
           const imageType = extractImageTypeFromBase64(image.src);
@@ -322,7 +330,6 @@ function onPageLoad() {
             height,
             imageType
           );
-          imageOverlay.transform.rotation = 0;
           const contentInner = view.contentInner;
           const [offsetLeft, offsetTop] = offsetRelativeToAncestor(
             image,
@@ -333,6 +340,7 @@ function onPageLoad() {
             (page.offsetHeight - offsetTop + page.offsetTop) *
               originalToActualRatio -
             height;
+          adjustTransformToPageRotation(imageOverlay.transform, pdfPage);
           if (!pageOverlaysMap.has(pageNumber)) {
             pageOverlaysMap.set(pageNumber, new PageOverlays());
           }
@@ -400,6 +408,13 @@ function onPageLoad() {
         const pagesToIncludeImage = getPagesToInclude(pages, draggable);
 
         for (const pageNumber of pagesToIncludeImage) {
+          const pdfPage = pdfDocument.getCachedPage(pageNumber);
+          if (pdfPage == null) {
+            console.log(
+              `Could not retrieve page ${pageNumber} for text overlay, aborting...`
+            );
+            continue;
+          }
           const textOverlay: TextOverlay = new TextOverlay();
           textOverlay.text = textInputCasted.value;
           const page = pages[pageNumber - 1] as HTMLElement;
@@ -425,12 +440,16 @@ function onPageLoad() {
               textInputCasted.offsetHeight *
               (originalToActualRatio + 1)) /
             originalToActualRatio;
+
           const p2 =
             p1 +
             page.offsetHeight -
             (offsetTop + textInputCasted.offsetHeight - page.offsetTop);
           textOverlay.transform.y =
             (p2 + p2 / page.offsetHeight) * originalToActualRatio;
+
+          adjustTransformToPageRotation(textOverlay.transform, pdfPage);
+
           if (!pageOverlaysMap.has(pageNumber)) {
             pageOverlaysMap.set(pageNumber, new PageOverlays());
           }
@@ -456,6 +475,66 @@ function onPageLoad() {
       }
 
       return [x, y];
+    }
+
+    function adjustTransformToPageRotation(
+      transform: Transform,
+      pdfPage: PdfPage
+    ): void {
+      var drawX = null;
+      var drawY = null;
+
+      const pageRotation = pdfPage.getRotation();
+      const rotationRads = (pageRotation * Math.PI) / 180;
+      var dimensionWidth = pdfPage.getSize()[0];
+      var dimensionHeight = pdfPage.getSize()[1];
+
+      if (pageRotation == 90 || pageRotation == 270) {
+        const t = dimensionWidth;
+        dimensionWidth = dimensionHeight;
+        dimensionHeight = t;
+      }
+
+      console.log(
+        "simon #1 printing page size ",
+        dimensionWidth,
+        dimensionHeight,
+        pageRotation
+      );
+
+      if (pageRotation === 90) {
+        drawX =
+          transform.x * Math.cos(rotationRads) -
+          transform.y * Math.sin(rotationRads) +
+          dimensionWidth;
+        drawY =
+          transform.x * Math.sin(rotationRads) +
+          transform.y * Math.cos(rotationRads);
+      } else if (pageRotation === 180) {
+        drawX =
+          transform.x * Math.cos(rotationRads) -
+          transform.y * Math.sin(rotationRads) +
+          dimensionWidth;
+        drawY =
+          transform.x * Math.sin(rotationRads) +
+          transform.y * Math.cos(rotationRads) +
+          dimensionHeight;
+      } else if (pageRotation === 270) {
+        drawX =
+          transform.x * Math.cos(rotationRads) -
+          transform.y * Math.sin(rotationRads);
+        drawY =
+          transform.x * Math.sin(rotationRads) +
+          transform.y * Math.cos(rotationRads) +
+          dimensionHeight;
+      } else {
+        //no rotation
+        drawX = transform.x;
+        drawY = transform.y;
+      }
+      transform.x = drawX;
+      transform.y = drawY;
+      transform.rotation = pageRotation;
     }
 
     function gotoPage(pageNumber: number, scrollToPage: boolean = true) {

@@ -7,6 +7,7 @@ import {
   StandardFonts,
   degrees,
   rgb,
+  toRadians,
 } from "pdf-lib";
 
 import { FormInputValues } from "./FormInputValues";
@@ -39,14 +40,13 @@ export class PdfDocumentSaver {
 
     for (const [pageNumber, pageOverlays] of overlays.pagesOverlays) {
       const page = pdfDoc.getPage(pageNumber - 1); // in pdflib pages are 0-based
-
       this.doTextDrawing(pageOverlays, page, neededFonts, helveticaFont);
       this.doImageDrawing(pageOverlays, page, base64ToPdfImageMap);
     }
 
-    if (rotateBy != 0) {
-      this.rotatePages(pdfDoc, rotateBy);
-    }
+    //if (rotateBy != 0) {
+    this.rotatePages(pdfDoc, rotateBy);
+    //}
 
     return pdfDoc.save();
   }
@@ -122,6 +122,7 @@ export class PdfDocumentSaver {
       page.drawText(textOverlay.text, {
         x: textOverlay.transform.x,
         y: textOverlay.transform.y,
+        rotate: degrees(textOverlay.transform.rotation),
         size: textOverlay.textSize,
         font: neededFonts.get(textOverlay.fontFamily) || helveticaFont,
         color: rgb(

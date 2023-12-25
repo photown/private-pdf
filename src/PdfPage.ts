@@ -60,6 +60,10 @@ export class PdfPage {
     }
   }
 
+  public getRotation(): number {
+    return this.pdfPageProxy.getViewport().rotation;
+  }
+
   public getSize(): [number, number] {
     const viewport = this.pdfPageProxy.getViewport({ scale: 1 });
     return [viewport.width, viewport.height];
