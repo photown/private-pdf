@@ -134,15 +134,18 @@ function onPageLoad() {
 
     gotoPage(currentPage, /* scrollToPage = */ false);
 
-    for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
-      await pdfDocument.loadPage(i).then(function (pdfPage: PdfPage) {
+    for (
+      var pageNumber = 1;
+      pageNumber <= pdfDocument.getPageCount();
+      pageNumber++
+    ) {
+      await pdfDocument.loadPage(pageNumber).then(function (pdfPage: PdfPage) {
         pdfPage.render(view.container, /* scale = */ 1, /* rotation = */ 0);
         if (originalToActualRatio == -1) {
-          const [_, height] = pdfPage.getSize();
-          const actualPdfHeight = (
-            view.container.querySelectorAll(".page")[i - 1] as HTMLElement
-          ).offsetHeight;
-          originalToActualRatio = height / actualPdfHeight;
+          originalToActualRatio = view.calculateOriginalToActualRatio(
+            pageNumber,
+            pdfPage
+          );
         }
       });
     }
@@ -295,7 +298,10 @@ function onPageLoad() {
       if (image) {
         const pages = document.querySelectorAll("#content .page");
 
-        const pagesToIncludeImage = getPagesToInclude(pages, draggable);
+        const pagesToIncludeImage = getPagesOverlappingOverlay(
+          pages,
+          draggable
+        );
 
         for (const pageNumber of pagesToIncludeImage) {
           const pdfPage = pdfDocument.getCachedPage(pageNumber);
@@ -352,7 +358,7 @@ function onPageLoad() {
     }
 
     // Returns a list of the page numbers for the pages that the draggable overlaps with.
-    function getPagesToInclude(
+    function getPagesOverlappingOverlay(
       pages: NodeListOf<Element>,
       draggable: HTMLElement
     ): Array<number> {
@@ -405,7 +411,10 @@ function onPageLoad() {
       const pages = document.querySelectorAll("#content .page");
       if (textInput) {
         const textInputCasted = textInput as HTMLInputElement;
-        const pagesToIncludeImage = getPagesToInclude(pages, draggable);
+        const pagesToIncludeImage = getPagesOverlappingOverlay(
+          pages,
+          draggable
+        );
 
         for (const pageNumber of pagesToIncludeImage) {
           const pdfPage = pdfDocument.getCachedPage(pageNumber);

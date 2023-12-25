@@ -1,4 +1,5 @@
 import { FormInputValues } from "./FormInputValues";
+import { PdfPage } from "./PdfPage";
 
 export class View {
   public readonly container: HTMLDivElement = document.getElementById(
@@ -448,6 +449,17 @@ export class View {
         console.log("page element null");
       }
     }
+  }
+
+  public calculateOriginalToActualRatio(
+    pageNumber: number,
+    pdfPage: PdfPage
+  ): number {
+    const [_, height] = pdfPage.getSize();
+    const actualPdfHeight = (
+      this.container.querySelectorAll(".page")[pageNumber - 1] as HTMLElement
+    ).offsetHeight;
+    return height / actualPdfHeight;
   }
 
   private calculateSmallestZIndex(collection: Array<HTMLElement>): number {
