@@ -1,5 +1,7 @@
 import { FormInputValues } from "./FormInputValues";
+import { ImageDraggableMetadata } from "./draggables/ImageDraggableMetadata";
 import { PdfPage } from "./PdfPage";
+import { TextDraggableMetadata } from "./draggables/TextDraggableMetadata";
 
 export class View {
   public readonly container: HTMLDivElement = document.getElementById(
@@ -462,6 +464,72 @@ export class View {
     return height / actualPdfHeight;
   }
 
+  public getTextDraggableMetadata(): Array<TextDraggableMetadata> {
+    const that = this;
+    return Array.from(document.querySelectorAll(".draggable"))
+      .filter((draggable) => draggable.classList.contains("text"))
+      .map(function (draggable) {
+        const casted = draggable as HTMLElement;
+        const textInputCasted = draggable.querySelector(
+          'input[type="text"]'
+        ) as HTMLInputElement;
+        const offsetRelativeToAncestor = that.offsetRelativeToAncestor(
+          textInputCasted,
+          that.contentInner
+        );
+        const computedStyle = window.getComputedStyle(textInputCasted, null);
+        return new TextDraggableMetadata(
+          textInputCasted,
+          textInputCasted.value,
+          computedStyle.fontFamily,
+          parseInt(computedStyle.fontSize),
+          computedStyle.color,
+          textInputCasted.offsetHeight,
+          offsetRelativeToAncestor,
+          /* draggableTopLeft = */ [casted.offsetLeft, casted.offsetTop],
+          /* draggableBottomRight = */ [
+            casted.offsetLeft + casted.offsetWidth,
+            casted.offsetTop + casted.offsetHeight,
+          ]
+        );
+      });
+  }
+
+  public getImageDraggableMetadata(): Array<ImageDraggableMetadata> {
+    const that = this;
+    return Array.from(document.querySelectorAll(".draggable"))
+      .filter((draggable) => draggable.classList.contains("image"))
+      .map(function (draggable) {
+        const casted = draggable as HTMLElement;
+        const scale =
+          parseFloat(
+            (
+              draggable.querySelector(
+                "input[type=number].scale"
+              ) as HTMLInputElement
+            ).value
+          ) / 100;
+        const image = draggable.querySelector(
+          ".image-wrapper"
+        ) as HTMLImageElement;
+
+        const [offsetLeft, offsetTop] = that.offsetRelativeToAncestor(
+          image,
+          that.contentInner
+        );
+        return new ImageDraggableMetadata(
+          image.src,
+          [image.naturalWidth * scale, image.naturalHeight * scale],
+          [offsetLeft, offsetTop],
+          /* draggableTopLeft = */ [casted.offsetLeft, casted.offsetTop],
+          /* draggableBottomRight = */ [
+            casted.offsetLeft + casted.offsetWidth,
+            casted.offsetTop + casted.offsetHeight,
+          ]
+        );
+      });
+  }
+
   private calculateSmallestZIndex(collection: Array<HTMLElement>): number {
     return Math.min(
       ...Array.from(collection, (el) => parseInt(getComputedStyle(el).zIndex))
@@ -483,6 +551,23 @@ export class View {
     } else {
       console.log("Invalid Input");
     }
+  }
+
+  private offsetRelativeToAncestor(
+    child: HTMLElement,
+    ancestor: HTMLElement
+  ): [number, number] {
+    var x: number = 0;
+    var y: number = 0;
+
+    var currentElement: HTMLElement | null = child;
+    while (currentElement != ancestor && currentElement != null) {
+      x += currentElement.offsetLeft;
+      y += currentElement.offsetTop;
+      currentElement = currentElement.parentElement;
+    }
+
+    return [x, y];
   }
 
   private handleFontColorInputChange(event: Event, newDraggable: HTMLElement) {

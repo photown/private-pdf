@@ -12,6 +12,8 @@ import { PageOverlays } from "./overlays/PageOverlays";
 import { TextOverlay } from "./overlays/TextOverlay";
 import { View } from "./View";
 import { Transform } from "./overlays/Transform";
+import { TextDraggableMetadata } from "./draggables/TextDraggableMetadata";
+import { ImageDraggableMetadata } from "./draggables/ImageDraggableMetadata";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "../node_modules/pdfjs-dist/build/pdf.worker.js";
@@ -232,15 +234,16 @@ function onPageLoad() {
 
     function extractOverlays(): Overlays {
       const overlays: Overlays = new Overlays();
-      const draggables = document.querySelectorAll(".draggable");
       const pageOverlaysMap: Map<number, PageOverlays> = new Map();
 
-      draggables.forEach(function (draggable: Element) {
-        if (draggable.classList.contains("text")) {
-          addTextOverlay(draggable as HTMLElement, pageOverlaysMap);
-        } else if (draggable.classList.contains("image")) {
-          addImageOverlay(draggable as HTMLElement, pageOverlaysMap);
-        }
+      const textDraggableMetadatas = view.getTextDraggableMetadata();
+      textDraggableMetadatas.forEach(function (textDraggableMetadata) {
+        addTextOverlay(textDraggableMetadata, pageOverlaysMap);
+      });
+
+      const imageDraggableMetadatas = view.getImageDraggableMetadata();
+      imageDraggableMetadatas.forEach(function (imageDraggableMetadata) {
+        addImageOverlay(imageDraggableMetadata, pageOverlaysMap);
       });
 
       for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
@@ -289,87 +292,67 @@ function onPageLoad() {
     }
 
     function addImageOverlay(
-      draggable: HTMLElement,
+      draggable: ImageDraggableMetadata,
       pageOverlaysMap: Map<number, PageOverlays>
     ) {
-      const image = draggable.querySelector(
-        ".image-wrapper"
-      ) as HTMLImageElement;
-      if (image) {
-        const pages = document.querySelectorAll("#content .page");
+      const pages = document.querySelectorAll("#content .page");
 
-        const pagesToIncludeImage = getPagesOverlappingOverlay(
-          pages,
-          draggable
-        );
+      const pagesToIncludeImage = getPagesOverlappingOverlay(
+        pages,
+        draggable.draggableTopLeft,
+        draggable.draggableBottomRight
+      );
 
-        for (const pageNumber of pagesToIncludeImage) {
-          const pdfPage = pdfDocument.getCachedPage(pageNumber);
-          if (pdfPage == null) {
-            console.log(
-              `Could not retrieve page ${pageNumber} for text overlay, aborting...`
-            );
-            continue;
-          }
-          const page = pages[pageNumber - 1] as HTMLElement;
-
-          const imageType = extractImageTypeFromBase64(image.src);
-          if (imageType == null) {
-            console.log(
-              `Could not extract image type for base64 image ${image.src} - not PNG nor JPEG.`
-            );
-            continue;
-          }
-          const scale =
-            parseFloat(
-              (
-                draggable.querySelector(
-                  "input[type=number].scale"
-                ) as HTMLInputElement
-              ).value
-            ) / 100;
-          const width = image.naturalWidth * scale * originalToActualRatio;
-          const height = image.naturalHeight * scale * originalToActualRatio;
-          const imageOverlay = new ImageOverlay(
-            image.src,
-            width,
-            height,
-            imageType
+      for (const pageNumber of pagesToIncludeImage) {
+        const pdfPage = pdfDocument.getCachedPage(pageNumber);
+        if (pdfPage == null) {
+          console.log(
+            `Could not retrieve page ${pageNumber} for text overlay, aborting...`
           );
-          const contentInner = view.contentInner;
-          const [offsetLeft, offsetTop] = offsetRelativeToAncestor(
-            image,
-            contentInner
-          );
-          imageOverlay.transform.x = offsetLeft * originalToActualRatio;
-          imageOverlay.transform.y =
-            (page.offsetHeight - offsetTop + page.offsetTop) *
-              originalToActualRatio -
-            height;
-          adjustTransformToPageRotation(imageOverlay.transform, pdfPage);
-          if (!pageOverlaysMap.has(pageNumber)) {
-            pageOverlaysMap.set(pageNumber, new PageOverlays());
-          }
-          (pageOverlaysMap.get(pageNumber) as PageOverlays).imageOverlays.push(
-            imageOverlay
-          );
+          continue;
         }
+        const page = pages[pageNumber - 1] as HTMLElement;
+
+        const imageType = extractImageTypeFromBase64(draggable.imageBase64);
+        if (imageType == null) {
+          console.log(
+            `Could not extract image type for base64 image ${draggable.imageBase64} - not PNG nor JPEG.`
+          );
+          continue;
+        }
+        const width = draggable.scaledSize[0] * originalToActualRatio;
+        const height = draggable.scaledSize[1] * originalToActualRatio;
+        const imageOverlay = new ImageOverlay(
+          draggable.imageBase64,
+          width,
+          height,
+          imageType
+        );
+        const [offsetLeft, offsetTop] = draggable.offsetToAncestor;
+        imageOverlay.transform.x = offsetLeft * originalToActualRatio;
+        imageOverlay.transform.y =
+          (page.offsetHeight - offsetTop + page.offsetTop) *
+            originalToActualRatio -
+          height;
+        adjustTransformToPageRotation(imageOverlay.transform, pdfPage);
+        if (!pageOverlaysMap.has(pageNumber)) {
+          pageOverlaysMap.set(pageNumber, new PageOverlays());
+        }
+        (pageOverlaysMap.get(pageNumber) as PageOverlays).imageOverlays.push(
+          imageOverlay
+        );
       }
     }
 
     // Returns a list of the page numbers for the pages that the draggable overlaps with.
     function getPagesOverlappingOverlay(
       pages: NodeListOf<Element>,
-      draggable: HTMLElement
+      draggableTopLeft: [number, number],
+      draggableBottomRight: [number, number]
     ): Array<number> {
       const pagesToInclude = [];
       for (var i = 1; i <= pdfDocument.getPageCount(); i++) {
         const page = pages[i - 1] as HTMLElement;
-        const draggableTopLeft = [draggable.offsetLeft, draggable.offsetTop];
-        const draggableBottomRight = [
-          draggable.offsetLeft + draggable.offsetWidth,
-          draggable.offsetTop + draggable.offsetHeight,
-        ];
         const pageTopLeft = [page.offsetLeft, page.offsetTop];
         const pageBottomRight = [
           page.offsetLeft + page.offsetWidth,
@@ -403,17 +386,16 @@ function onPageLoad() {
     }
 
     function addTextOverlay(
-      draggable: HTMLElement,
+      draggable: TextDraggableMetadata,
       pageOverlaysMap: Map<number, PageOverlays>
     ) {
-      const textInput = draggable.querySelector('input[type="text"]');
-      const contentInner = view.contentInner;
+      const textInput = draggable.textInput;
       const pages = document.querySelectorAll("#content .page");
       if (textInput) {
-        const textInputCasted = textInput as HTMLInputElement;
         const pagesToIncludeImage = getPagesOverlappingOverlay(
           pages,
-          draggable
+          draggable.draggableTopLeft,
+          draggable.draggableBottomRight
         );
 
         for (const pageNumber of pagesToIncludeImage) {
@@ -425,35 +407,30 @@ function onPageLoad() {
             continue;
           }
           const textOverlay: TextOverlay = new TextOverlay();
-          textOverlay.text = textInputCasted.value;
+          textOverlay.text = draggable.text;
           const page = pages[pageNumber - 1] as HTMLElement;
-          const computedStyle = window.getComputedStyle(textInputCasted, null);
-          const fontSizeStr: string = computedStyle.fontSize;
-          const fontSizePx = Number.parseInt(fontSizeStr);
+          const fontSizePx = draggable.fontSize;
 
           textOverlay.textColor = ColorUtils.normalize(
-            ColorUtils.parseRgb(computedStyle.color) || ColorUtils.BLACK
+            ColorUtils.parseRgb(draggable.color) || ColorUtils.BLACK
           );
           textOverlay.textSize = fontSizePx * originalToActualRatio;
-          textOverlay.fontFamily = computedStyle.fontFamily;
-          const [offsetLeft, offsetTop] = offsetRelativeToAncestor(
-            textInputCasted,
-            contentInner
-          );
+          textOverlay.fontFamily = draggable.fontFamily;
+          const [offsetLeft, offsetTop] = draggable.offsetToAncestor;
           textOverlay.transform.x =
             (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) *
             originalToActualRatio;
           const p1 =
             (0.5 *
-              baselineRatio(computedStyle.fontFamily, fontSizePx) *
-              textInputCasted.offsetHeight *
+              baselineRatio(draggable.fontFamily, fontSizePx) *
+              draggable.textInputOffsetHeight *
               (originalToActualRatio + 1)) /
             originalToActualRatio;
 
           const p2 =
             p1 +
             page.offsetHeight -
-            (offsetTop + textInputCasted.offsetHeight - page.offsetTop);
+            (offsetTop + draggable.textInputOffsetHeight - page.offsetTop);
           textOverlay.transform.y =
             (p2 + p2 / page.offsetHeight) * originalToActualRatio;
 
@@ -467,23 +444,6 @@ function onPageLoad() {
           );
         }
       }
-    }
-
-    function offsetRelativeToAncestor(
-      child: HTMLElement,
-      ancestor: HTMLElement
-    ): [number, number] {
-      var x: number = 0;
-      var y: number = 0;
-
-      var currentElement: HTMLElement | null = child;
-      while (currentElement != ancestor && currentElement != null) {
-        x += currentElement.offsetLeft;
-        y += currentElement.offsetTop;
-        currentElement = currentElement.parentElement;
-      }
-
-      return [x, y];
     }
 
     function adjustTransformToPageRotation(
@@ -503,13 +463,6 @@ function onPageLoad() {
         dimensionWidth = dimensionHeight;
         dimensionHeight = t;
       }
-
-      console.log(
-        "simon #1 printing page size ",
-        dimensionWidth,
-        dimensionHeight,
-        pageRotation
-      );
 
       if (pageRotation === 90) {
         drawX =
