@@ -44,5 +44,6 @@ jobs:
         git rm -rf src
         git rm -rf .gitignore
         git add .
+        git add -f dist
         git commit -m "Deploy to gh-pages"
         git push -f origin gh-pages
