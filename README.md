@@ -30,7 +30,7 @@ This tool has mainly been tested on desktop Chrome on Windows 11.
 
 ### Rotate PDFs
 
-![<img src="readme/rotate_pdf.png">](readme/rotate_pdf.png)
+![<img src="readme/rotate_pdfs.png">](readme/rotate_pdfs.png)
 
 ## Future features
 
