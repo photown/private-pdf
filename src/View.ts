@@ -173,7 +173,7 @@ export class View {
           "beforeend",
           `
           <div class="text draggable focused" tabindex="0">
-            <input type="text" class="text" value="" />
+            <input type="text" class="text" value="" size="20" />
             <div class="text-options focused">
               <div class="img-container drag-handle">
                 <img src="img/icon_drag.png" draggable="false" />
@@ -200,6 +200,11 @@ export class View {
         const newDraggable = draggables[draggables.length - 1] as HTMLElement;
         that.setupDraggable(newDraggable, draggables.length);
 
+        (
+          newDraggable.querySelector("input[type=text].text") as HTMLElement
+        ).addEventListener("input", function (event: Event) {
+          that.handleTextInputChange(event);
+        });
         (
           newDraggable.querySelector(
             "input[type=number].fontSize"
@@ -582,6 +587,16 @@ export class View {
     }
 
     return [x, y];
+  }
+
+  private handleTextInputChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const inputValue = input.value;
+    if (inputValue.length * 1.25 > input.size) {
+      input.size = Math.max(inputValue.length * 1.25, 20);
+    } else if (inputValue.length * 0.75 < input.size) {
+      input.size = Math.max(inputValue.length * 1.25, 20);
+    }
   }
 
   private handleFontColorInputChange(event: Event, newDraggable: HTMLElement) {
