@@ -169,7 +169,7 @@ export class View {
           "beforeend",
           `
           <div class="text draggable focused" tabindex="0">
-            <input type="text" class="text" value="test123" />
+            <input type="text" class="text" value="" />
             <div class="text-options focused">
               <div class="img-container drag-handle">
                 <img src="img/icon_drag.png" draggable="false" />
