@@ -172,21 +172,21 @@ export class View {
             <input type="text" class="text" value="test123" />
             <div class="text-options focused">
               <div class="img-container drag-handle">
-                <img src="../img/icon_drag.png" draggable="false" />
+                <img src="img/icon_drag.png" draggable="false" />
               </div>
               <div class="separator"></div>
               <div class="img-container">
-                <img src="../img/icon_font_size.png" />
+                <img src="img/icon_font_size.png" />
               </div>
               <input type="number" class="fontSize" min="8" max="96" value="14">
               <div class="separator"></div>
               <div class="img-container">
-                <img src="../img/icon_text_color.png" />
+                <img src="img/icon_text_color.png" />
               </div>
               <input type="color" class="fontColor">
               <div class="separator"></div>
               <div class="img-container">
-                <button class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+                <button class="options-delete" style="background: url('img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
               </div>
             </div>
           </div>
@@ -228,12 +228,12 @@ export class View {
           <img class="image-wrapper" />
           <div class="text-options focused">
             <div class="img-container drag-handle">
-              <img src="../img/icon_drag.png" draggable="false" />
+              <img src="img/icon_drag.png" draggable="false" />
             </div>
             <div class="separator"></div>
             <input type="number" class="scale" min="1" value="100">
             <div class="img-container">
-              <button class="options-delete" style="background: url('../img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+              <button class="options-delete" style="background: url('img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
             </div>
           </div>
         </div>
