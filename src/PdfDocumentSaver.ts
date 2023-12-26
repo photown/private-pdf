@@ -7,7 +7,6 @@ import {
   StandardFonts,
   degrees,
   rgb,
-  toRadians,
 } from "pdf-lib";
 
 import { FormInputValues } from "./FormInputValues";
