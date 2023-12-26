@@ -33,7 +33,7 @@ function onPageLoad() {
 
   view.setOnPdfFileChosenListener(async function (pdfFile: File) {
     await readFileAsArrayBuffer(pdfFile).then(function (fileData: ArrayBuffer) {
-      loadPdf(fileData);
+      loadPdf(pdfFile.name, fileData);
     });
   });
 
@@ -75,7 +75,8 @@ function onPageLoad() {
         return response.arrayBuffer();
       })
       .then((arrayBuffer) => {
-        loadPdf(arrayBuffer);
+        const fileName = url.split("/").pop() || "mypdf.pdf";
+        loadPdf(fileName, arrayBuffer);
       })
       .catch((error) => {
         console.error("Error downloading file:", error);
@@ -83,7 +84,7 @@ function onPageLoad() {
       });
   }
 
-  async function loadPdf(fileData: ArrayBuffer) {
+  async function loadPdf(fileName: string, fileData: ArrayBuffer) {
     currentPage = 1;
     var originalToActualRatio: number = -1;
 
@@ -203,7 +204,7 @@ function onPageLoad() {
         overlays,
         /* rotateBy = */ 90
       );
-      loadPdf(savedBytes);
+      loadPdf(fileName, savedBytes);
     });
 
     view.setOnSaveClickedListener(async function () {
@@ -212,7 +213,7 @@ function onPageLoad() {
 
       const bytes = await pdfDocument.savePdf(formInputValues, overlays);
 
-      view.downloadBlob(bytes, "testfile");
+      view.downloadBlob(bytes, "privatepdf-" + fileName);
     });
 
     view.setOnInsertTextClickListener();
