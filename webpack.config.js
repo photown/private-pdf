@@ -1,4 +1,5 @@
 const path = require("path");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: "./src/Main.ts",
@@ -18,4 +19,14 @@ module.exports = {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "node_modules/pdfjs-dist/build/pdf.worker.js", to: "." },
+        { from: "node_modules/pdfjs-dist/cmaps/", to: "cmaps" },
+        { from: "node_modules/pdfjs-dist/web/pdf_viewer.css", to: "." },
+        { from: "node_modules/pdfjs-dist/web/images/", to: "images" },
+      ],
+    }),
+  ],
 };

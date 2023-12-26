@@ -15,12 +15,11 @@ import { Transform } from "./overlays/Transform";
 import { TextDraggableMetadata } from "./draggables/TextDraggableMetadata";
 import { ImageDraggableMetadata } from "./draggables/ImageDraggableMetadata";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "../node_modules/pdfjs-dist/build/pdf.worker.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "dist/pdf.worker.js";
 
 // // Some PDFs need external cmaps.
 // //
-const CMAP_URL = "../node_modules/pdfjs-dist/cmaps/";
+const CMAP_URL = "dist/cmaps/";
 const CMAP_PACKED = true;
 
 const DEFAULT_URL =
