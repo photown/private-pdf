@@ -564,6 +564,10 @@ export class View {
       });
   }
 
+  public getAllPages(): NodeListOf<Element> {
+    return document.querySelectorAll("#content .page");
+  }
+
   private calculateSmallestZIndex(collection: Array<HTMLElement>): number {
     return Math.min(
       ...Array.from(collection, (el) => parseInt(getComputedStyle(el).zIndex))

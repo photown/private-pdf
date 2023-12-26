@@ -318,7 +318,7 @@ function onPageLoad() {
       draggable: ImageDraggableMetadata,
       pageOverlaysMap: Map<number, PageOverlays>
     ) {
-      const pages = document.querySelectorAll("#content .page");
+      const pages = view.getAllPages();
 
       const pagesToIncludeImage = getPagesOverlappingOverlay(
         pages,
@@ -413,7 +413,7 @@ function onPageLoad() {
       pageOverlaysMap: Map<number, PageOverlays>
     ) {
       const textInput = draggable.textInput;
-      const pages = document.querySelectorAll("#content .page");
+      const pages = view.getAllPages();
       if (textInput) {
         const pagesToIncludeImage = getPagesOverlappingOverlay(
           pages,
