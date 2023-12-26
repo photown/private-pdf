@@ -3,7 +3,7 @@ name: Build and Deploy to gh-pages
 on:
   push:
     branches:
-      - main  # Change this to your main branch name
+      - main
 
 jobs:
   build:
@@ -22,41 +22,14 @@ jobs:
       run: npm install
 
     - name: Build with Webpack
-      run: npm run build  # Adjust this command based on your project
-
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #   - name: Checkout Repository
-  #     uses: actions/checkout@v2
-
-  #   - name: Set up Node.js
-  #     uses: actions/setup-node@v3
-  #     with:
-  #       node-version: 14
+      run: npm run build
 
     - name: Deploy to gh-pages
       run: |
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
-        echo "printing git status 1"
-        git status
-        echo "printing ls"
-        ls -l
         git checkout --orphan gh-pages
         git add dist -f
-         echo "printing git status 2"
-        git status
-        
         git rm -rf ':!index.html' ':!img' ':!dist'
-
-        # git rm -rf node_modules
-        #git rm -rf .gitignore
-        #git add -f node_modules/pdfjs-dist
-        # git add .
-        # git add -f dist
-        # git add -f index.html
-        # git add -f img
         git commit -m "Deploy to gh-pages"
         git push -f origin gh-pages
