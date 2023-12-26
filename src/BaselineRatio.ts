@@ -1,4 +1,7 @@
-/** Helper method to calculate the ratio between the top of the font to its baseline and its baseline to the bottom of the font. */
+/** Helper method to calculate the ratio between the top of the font to its baseline and its baseline to the bottom of the font.
+ *
+ * Implementation inspired by https://github.com/nathanhammond/baseline-ratio
+ */
 export const baselineRatio = (
   fontFamily: string,
   fontSizePx: number
