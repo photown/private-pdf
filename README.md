@@ -48,6 +48,14 @@ This tool has mainly been tested on desktop Chrome on Windows 11.
 - Developed on Visual Studio Code
 - Code formatted with [Prettier](https://prettier.io/)
 
+## Building instructions
+
+1. Clone the repo
+2. Run `npm install` to install all dependencies
+3. Run `npm run build` to compile the source code into a JS bundle file
+4. To use the tool from your browser, start a server from the root project directory, for example by running `python -m http.server` which makes the tool accessible on port 8000.
+5. In your browser go to `localhost:8000`
+
 ## License
 
 PrivatePDF is [MIT licensed](LICENSE).
