@@ -17,15 +17,8 @@ import { ImageDraggableMetadata } from "./draggables/ImageDraggableMetadata";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = "dist/pdf.worker.js";
 
-// // Some PDFs need external cmaps.
-// //
 const CMAP_URL = "dist/cmaps/";
 const CMAP_PACKED = true;
-
-const DEFAULT_URL =
-  "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf";
-const DEFAULT_PAGE = 1;
-const SCALE = 1.0;
 const ENABLE_XFA = true;
 const THUMBNAIL_MAX_SIZE = 96;
 
@@ -35,6 +28,8 @@ window.onload = onPageLoad;
 
 function onPageLoad() {
   const view = new View();
+
+  parsePageUrl();
 
   view.setOnPdfFileChosenListener(async function (pdfFile: File) {
     await readFileAsArrayBuffer(pdfFile).then(function (fileData: ArrayBuffer) {
@@ -62,7 +57,14 @@ function onPageLoad() {
     });
   }
 
-  //downloadAndLoadPdf(DEFAULT_URL);
+  function parsePageUrl() {
+    const pdfParamValue = new URLSearchParams(window.location.search).get(
+      "pdf"
+    );
+    if (pdfParamValue != null && pdfParamValue != "") {
+      downloadAndLoadPdf(pdfParamValue);
+    }
+  }
 
   function downloadAndLoadPdf(url: string) {
     fetch(url)

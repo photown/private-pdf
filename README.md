@@ -6,7 +6,7 @@ I created this tool to make it quick and easy to sign PDF contracts, without hav
 
 It supports the bare minimum for my most common usecases. It is not intended to be a full-featured PDF editor.
 
-[Check it out!](https://photown.github.io/private-pdf/)
+Check it out by either [uploading a PDF of your own](https://photown.github.io/private-pdf/), or [with a preloaded sample PDF](https://photown.github.io/private-pdf/?pdf=https://raw.githubusercontent.com/photown/private-pdf/09b3a899cbce5ba2d5241110e944139d7f7e161a/readme/sample.pdf).
 
 This tool has mainly been tested on desktop Chrome on Windows 11.
 
@@ -37,7 +37,6 @@ This tool has mainly been tested on desktop Chrome on Windows 11.
 - Create your own signature within the tool
 - Ability to insert symbols
 - Ability to rearrange and insert pages
-- Load PDFs from link
 - Improve UI
 
 ## Technologies used
