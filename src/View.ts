@@ -226,13 +226,19 @@ export class View {
     validateBase64: (base64: string) => boolean
   ) {
     const that = this;
-    (document.getElementById("insert-image-input") as HTMLElement).onchange =
-      async function () {
-        (
-          document.getElementById("overlayContainer") as HTMLElement
-        ).insertAdjacentHTML(
-          "beforeend",
-          `
+    const imageInput = document.getElementById(
+      "insert-image-input"
+    ) as HTMLInputElement;
+    imageInput.onclick = function () {
+      imageInput.value = "";
+    };
+    imageInput.onchange = async function () {
+      console.log("image was picked");
+      (
+        document.getElementById("overlayContainer") as HTMLElement
+      ).insertAdjacentHTML(
+        "beforeend",
+        `
         <div class="image draggable focused" tabindex="0">
           <img class="image-wrapper" />
           <div class="text-options focused">
@@ -250,59 +256,64 @@ export class View {
           </div>
         </div>
         `
-        );
-        const draggables = document.querySelectorAll(".draggable");
-        const newDraggable = draggables[draggables.length - 1] as HTMLElement;
-        that.setupDraggable(newDraggable, draggables.length);
+      );
+      const draggables = document.querySelectorAll(".draggable");
+      const newDraggable = draggables[draggables.length - 1] as HTMLElement;
+      that.setupDraggable(newDraggable, draggables.length);
 
-        var input = document.getElementById(
-          "insert-image-input"
-        ) as HTMLInputElement;
-        var img = newDraggable.querySelector(
-          ".image-wrapper"
-        ) as HTMLImageElement;
-        var file = input.files?.[0];
+      var input = document.getElementById(
+        "insert-image-input"
+      ) as HTMLInputElement;
+      var img = newDraggable.querySelector(
+        ".image-wrapper"
+      ) as HTMLImageElement;
+      var file = input.files?.[0];
 
-        if (file) {
-          var reader = new FileReader();
+      if (file) {
+        var reader = new FileReader();
 
-          reader.onload = function (e: ProgressEvent<FileReader>) {
-            const imageBase64 = (e.target?.result as string) || null;
-            if (imageBase64 != null && validateBase64(imageBase64)) {
-              img.src = imageBase64;
-            } else {
-              console.log(
-                `Invalid image format: ${imageBase64} must be either PNG or JPEG.`
-              );
-            }
-          };
+        reader.onload = function (e: ProgressEvent<FileReader>) {
+          const imageBase64 = (e.target?.result as string) || null;
+          if (imageBase64 != null && validateBase64(imageBase64)) {
+            img.src = imageBase64;
+          } else {
+            console.log(
+              `Invalid image format: ${imageBase64} must be either PNG or JPEG.`
+            );
+          }
+        };
 
-          reader.readAsDataURL(file);
-        } else {
-          img.src = ""; // Clear the image if no file is selected
-        }
+        reader.readAsDataURL(file);
+      } else {
+        img.src = ""; // Clear the image if no file is selected
+      }
 
-        const image = newDraggable.querySelector(
-          ".image-wrapper"
-        ) as HTMLImageElement;
-        (
-          newDraggable.querySelector("input[type=number].scale") as HTMLElement
-        ).addEventListener("input", function (event: Event) {
-          that.handleScaleInputChange(event, image);
-        });
-      };
+      const image = newDraggable.querySelector(
+        ".image-wrapper"
+      ) as HTMLImageElement;
+      (
+        newDraggable.querySelector("input[type=number].scale") as HTMLElement
+      ).addEventListener("input", function (event: Event) {
+        that.handleScaleInputChange(event, image);
+      });
+    };
   }
 
   public setOnPdfFileChosenListener(
     onPdfFileChosen: (pdfFile: File) => Promise<void>
   ) {
-    (document.getElementById("pdf-file-input") as HTMLElement).onchange =
-      async function (ev: Event) {
-        const input = ev.target as HTMLInputElement;
-        if (input.files && input.files.length > 0) {
-          onPdfFileChosen(input.files[0]);
-        }
-      };
+    const pdfInput = document.getElementById(
+      "pdf-file-input"
+    ) as HTMLInputElement;
+    pdfInput.onclick = function () {
+      pdfInput.value = "";
+    };
+    pdfInput.onchange = async function (ev: Event) {
+      const input = ev.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+        onPdfFileChosen(input.files[0]);
+      }
+    };
   }
 
   /** Iterates through all form fields in the PDF and returns them as a `FormInputValues` object. */
