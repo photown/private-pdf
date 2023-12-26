@@ -1,6 +1,7 @@
 import * as pdfjsLib from "pdfjs-dist";
 import { PdfDocument } from "./PdfDocument";
 
+/** Helper which loads a PDF file from the supplied `fileData`. */
 export class PdfDocumentLoader {
   constructor(
     private readonly fileData: ArrayBuffer,
@@ -10,7 +11,6 @@ export class PdfDocumentLoader {
   public async load(): Promise<PdfDocument> {
     const loadingTask = pdfjsLib.getDocument({
       data: this.fileData,
-      //url: this.url,
       cMapUrl: this.options.cMapUrl,
       cMapPacked: this.options.cMapPacked,
       enableXfa: this.options.enableXfa,
@@ -21,8 +21,8 @@ export class PdfDocumentLoader {
   }
 }
 
+/** PDF options for loading a PDF, such as the cMap URL. */
 export class PdfOptions {
-  // TODO: make these private
   constructor(
     readonly cMapUrl?: string,
     readonly cMapPacked: boolean = false,

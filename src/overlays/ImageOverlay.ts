@@ -1,10 +1,18 @@
 import { OverlayBase } from "./OverlayBase";
 
+/**
+ * Enumerates the supported image types.
+ */
 export enum ImageType {
   PNG,
   JPEG,
 }
 
+/**
+ * An overlay which describes an image, such as its base64 string representation, the image type, size, etc.
+ *
+ * @extends OverlayBase
+ */
 export class ImageOverlay extends OverlayBase {
   base64: string;
   imageType: ImageType;

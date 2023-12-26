@@ -1,6 +1,7 @@
 import * as pdfjsLib from "pdfjs-dist";
 import { EventBus, PDFPageView } from "pdfjs-dist/web/pdf_viewer";
 
+/** Represents a PDF page, providing methods to render pages and thumbnails. */
 export class PdfPage {
   constructor(
     private readonly pdfPageProxy: pdfjsLib.PDFPageProxy,

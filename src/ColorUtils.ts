@@ -20,7 +20,6 @@ export class ColorUtils {
       };
     }
 
-    // Return a default or handle the case when parsing fails
     return null;
   }
 

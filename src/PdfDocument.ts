@@ -6,6 +6,7 @@ import { PdfDocumentSaver } from "./PdfDocumentSaver";
 import { FormInputValues } from "./FormInputValues";
 import { Overlays } from "./overlays/Overlays";
 
+/** Represents a PDF document, providing methods to load and save PDFs. */
 export class PdfDocument {
   private pageCache: Map<number, PdfPage>;
 

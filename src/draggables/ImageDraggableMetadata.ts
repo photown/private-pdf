@@ -1,3 +1,4 @@
+/** Wrapper for data needed to create an `ImageOverlay`. */
 export class ImageDraggableMetadata {
   public imageBase64: string;
   public scaledSize: [number, number];

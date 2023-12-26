@@ -14,9 +14,11 @@ import { ImageType } from "./overlays/ImageOverlay";
 import { Overlays } from "./overlays/Overlays";
 import { PageOverlays } from "./overlays/PageOverlays";
 
+/** Helper which applies all changes made to a PDF and saves them into a new PDF. */
 export class PdfDocumentSaver {
   constructor() {}
 
+  /** Returns a `Uint8Array` which represents a PDF with all user-made changes applied, such as filled PDF forms, added overlays, page rotations. */
   public async applyChangesAndSave(
     originalPdfBytes: Uint8Array,
     formInputValues: FormInputValues,
@@ -26,9 +28,6 @@ export class PdfDocumentSaver {
     const pdfDoc = await PDFDocument.load(originalPdfBytes);
 
     this.populateFormValues(formInputValues, pdfDoc.getForm());
-
-    // TODO: validation
-    // TODO: refactor
 
     const neededFonts: Map<string, PDFFont> = await this.getNeededFonts(
       overlays,
@@ -43,9 +42,7 @@ export class PdfDocumentSaver {
       this.doImageDrawing(pageOverlays, page, base64ToPdfImageMap);
     }
 
-    //if (rotateBy != 0) {
     this.rotatePages(pdfDoc, rotateBy);
-    //}
 
     return pdfDoc.save();
   }
@@ -133,6 +130,7 @@ export class PdfDocumentSaver {
     }
   }
 
+  /** Populates the form fields in the PDF with any changes the user has done. */
   private populateFormValues(formInputValues: FormInputValues, form: PDFForm) {
     for (const [key, value] of formInputValues.textNameToValue) {
       try {
@@ -209,6 +207,7 @@ export class PdfDocumentSaver {
     }
   }
 
+  /** Returns any fonts that need to be embedded into the PDF. */
   private async getNeededFonts(overlays: Overlays, pdfDoc: PDFDocument) {
     const fontValues: string[] = Object.values(StandardFonts);
     const neededFonts: Map<string, PDFFont> = new Map();

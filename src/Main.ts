@@ -417,6 +417,9 @@ function onPageLoad() {
           textOverlay.textSize = fontSizePx * originalToActualRatio;
           textOverlay.fontFamily = draggable.fontFamily;
           const [offsetLeft, offsetTop] = draggable.offsetToAncestor;
+          // To calculate the text overlay position, we need to account for the fact that
+          // pdf-js requires the coordinates from the font baseline. Thus we need to
+          // calculate it ourselves.
           textOverlay.transform.x =
             (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) *
             originalToActualRatio;
@@ -446,6 +449,7 @@ function onPageLoad() {
       }
     }
 
+    /** Applies a matrix transformation on the `Transform` object to be aligned with the `PdfPage`. */
     function adjustTransformToPageRotation(
       transform: Transform,
       pdfPage: PdfPage

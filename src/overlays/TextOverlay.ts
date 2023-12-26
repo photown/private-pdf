@@ -2,6 +2,11 @@ import { ColorUtils } from "../ColorUtils";
 import { RGB } from "../RGB";
 import { OverlayBase } from "./OverlayBase";
 
+/**
+ * An overlay which describes a text label, such as its text, font size, color, etc.
+ *
+ * @extends OverlayBase
+ */
 export class TextOverlay extends OverlayBase {
   public text: string = "";
 

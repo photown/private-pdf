@@ -1,3 +1,4 @@
+/** Wrapper for data needed to create a `TextOverlay`. */
 export class TextDraggableMetadata {
   public textInput: HTMLInputElement;
   public text: string;

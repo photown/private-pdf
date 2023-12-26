@@ -3,6 +3,7 @@ import { ImageDraggableMetadata } from "./draggables/ImageDraggableMetadata";
 import { PdfPage } from "./PdfPage";
 import { TextDraggableMetadata } from "./draggables/TextDraggableMetadata";
 
+/** View which is responsible for displaying the data from the controller. */
 export class View {
   public readonly container: HTMLDivElement = document.getElementById(
     "pageContainer"
@@ -98,6 +99,7 @@ export class View {
       onClickListener;
   }
 
+  /** Updates the page number wherever relevant (such as the thumbnails) as the user scrolls. */
   public setOnContentScrollEventListener(
     scrollEvent: (currentPage: number) => void
   ) {
@@ -296,7 +298,8 @@ export class View {
       };
   }
 
-  public extractFormInputValues() {
+  /** Iterates through all form fields in the PDF and returns them as a `FormInputValues` object. */
+  public extractFormInputValues(): FormInputValues {
     const that = this;
     const formInputValues: FormInputValues = new FormInputValues();
 
@@ -338,6 +341,9 @@ export class View {
         (radioButton) => (radioButton as HTMLInputElement).checked
       );
       if (selected != null) {
+        // pdfjs doesn't necessarily add form fields in the same order as
+        // in the original PDF. Instead we rely on the zIndex which is in
+        // the correct order.
         var minZIndex = that.calculateSmallestZIndex(
           radioButtons.map((el) => el.parentElement as HTMLElement)
         );
@@ -597,6 +603,7 @@ export class View {
     }
   }
 
+  /** Sets up the draggable overlay's button options and dragging. */
   private setupDraggable(
     draggableElement: HTMLElement,
     numDraggables: number
