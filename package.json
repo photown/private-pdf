@@ -1,8 +1,8 @@
 {
-  "name": "pdf-editor",
-  "version": "1.0.0",
-  "description": "",
-  "main": "build/Main.js",
+  "name": "private-pdf",
+  "version": "0.0.1",
+  "description": "PrivatePDF is a free web tool that lets users make quick PDF edits from within their web browser, without uploading anything anywhere.",
+  "main": "dist/bundle.js",
   "dependencies": {
     "path": "^0.12.7",
     "pdf-lib": "^1.17.1",
@@ -12,7 +12,7 @@
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Antoan Angelov",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -27,8 +27,5 @@
     "typescript": "^5.3.2",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
-  },
-  "types": [
-    "pdfjs-dist"
-  ]
+  }
 }
