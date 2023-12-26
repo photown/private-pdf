@@ -41,11 +41,11 @@ This tool has mainly been tested on desktop Chrome on Windows 11.
 
 ## Technologies used
 
-- Written in TypeScript
-- Bundled with Webpack
+- Written in [TypeScript](https://www.typescriptlang.org/)
+- Bundled with [Webpack](https://webpack.js.org/)
 - PDFs rendered using [PDF.js](https://mozilla.github.io/pdf.js/)
 - PDFs edited using [pdf-lib](https://github.com/Hopding/pdf-lib)
-- Developed on Visual Studio Code
+- Developed on [Visual Studio Code](https://code.visualstudio.com/)
 - Code formatted with [Prettier](https://prettier.io/)
 
 ## Building instructions
