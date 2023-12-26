@@ -290,7 +290,6 @@ export class View {
     (document.getElementById("pdf-file-input") as HTMLElement).onchange =
       async function (ev: Event) {
         const input = ev.target as HTMLInputElement;
-        console.log(input.files);
         if (input.files && input.files.length > 0) {
           onPdfFileChosen(input.files[0]);
         }

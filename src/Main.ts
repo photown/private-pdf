@@ -75,12 +75,11 @@ function onPageLoad() {
         return response.arrayBuffer();
       })
       .then((arrayBuffer) => {
-        // The arrayBuffer contains the file data
-        console.log("File downloaded successfully:", arrayBuffer);
         loadPdf(arrayBuffer);
       })
       .catch((error) => {
         console.error("Error downloading file:", error);
+        alert(`Error downloading file: ${error}`);
       });
   }
 
@@ -111,7 +110,7 @@ function onPageLoad() {
           const pageNumber = Number.parseInt(
             entry.target.getAttribute("data-pagenumber") as string
           );
-          console.log("loading page " + pageNumber);
+          console.log("Loading page " + pageNumber);
           pdfDocument
             .loadPage(pageNumber)
             .then(function (page: PdfPage) {
