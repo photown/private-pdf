@@ -45,6 +45,7 @@ jobs:
         echo "printing ls"
         ls -l
         git checkout --orphan gh-pages
+        git add dist -f
          echo "printing git status 2"
         git status
         
