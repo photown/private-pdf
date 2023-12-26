@@ -8,7 +8,7 @@ It supports the bare minimum for my most common usecases. It is not intended to 
 
 [Check it out!](https://photown.github.io/private-pdf/)
 
-This tool has mainly been tested on Chrome on Windows 11.
+This tool has mainly been tested on desktop Chrome on Windows 11.
 
 ## Features
 
@@ -22,21 +22,23 @@ This tool has mainly been tested on Chrome on Windows 11.
 
 ### Insert text
 
-// TODO
+![<img src="readme/insert_text.png">](readme/insert_text.png)
 
 ### Insert images
 
-// TODO
+![<img src="readme/insert_images.png">](readme/insert_images.png)
 
 ### Rotate PDFs
 
-// TODO
+![<img src="readme/rotate_pdf.png">](readme/rotate_pdf.png)
 
 ## Future features
 
 - Create your own signature within the tool
 - Ability to insert symbols
 - Ability to rearrange and insert pages
+- Load PDFs from link
+- Improve UI
 
 ## Technologies used
 
