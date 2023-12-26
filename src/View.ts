@@ -128,7 +128,9 @@ export class View {
           }
         });
 
-        scrollEvent(currentScrollPage);
+        if (currentScrollPage != -1) {
+          scrollEvent(currentScrollPage);
+        }
       }
     );
   }
@@ -426,11 +428,15 @@ export class View {
     oldPage: number,
     scrollToPage: boolean = true
   ) {
-    const previousPageElement = document.querySelector(
-      `.thumbnail-list-container:nth-child(${oldPage})`
-    ) as HTMLElement | null;
-    if (previousPageElement) {
-      previousPageElement.classList.remove("thumbnail-list-container-selected");
+    if (oldPage >= 0) {
+      const previousPageElement = document.querySelector(
+        `.thumbnail-list-container:nth-child(${oldPage})`
+      ) as HTMLElement | null;
+      if (previousPageElement) {
+        previousPageElement.classList.remove(
+          "thumbnail-list-container-selected"
+        );
+      }
     }
 
     (document.querySelector("#current-page") as HTMLInputElement).value =
