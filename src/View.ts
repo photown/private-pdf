@@ -231,6 +231,9 @@ export class View {
               <img src="img/icon_drag.png" draggable="false" />
             </div>
             <div class="separator"></div>
+            <div class="img-container">
+                <img src="img/icon_scale_image.png" />
+              </div>
             <input type="number" class="scale" min="1" value="100">
             <div class="img-container">
               <button class="options-delete" style="background: url('img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
