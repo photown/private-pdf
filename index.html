@@ -17,9 +17,6 @@
       #flex-container {
         display: flex;
       }
-      #toolbar {
-        height: var(--toolbar-height);
-      }
       #toolbar-inner {
         padding: 10px;
         display: flex;
@@ -167,65 +164,93 @@
         align-items: center;
         justify-content: center;
       }
+      #top-bar {
+        display: flex;
+        justify-content: space-between;
+        height: var(--toolbar-height);
+      }
+      #socials {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        padding: 10px;
+      }
+      #socials a {
+        padding: 5px;
+      }
+      #socials a img {
+        display: block;
+      }
     </style>
 
     <link rel="stylesheet" href="dist/pdf_viewer.css" />
   </head>
 
   <body>
-    <div id="toolbar">
-      <div id="toolbar-inner">
-        <input
-          type="file"
-          accept=".pdf"
-          id="pdf-file-input"
-          name="pdf_file"
-          hidden
-        />
-        <button
-          id="pdf-file"
-          onclick="document.getElementById('pdf-file-input').click()"
-          title="Choose a PDF file"
-        >
-          <img src="img/button_choose_pdf.png" />
-        </button>
-        <button id="save" title="Save the PDF to disk" disabled>
-          <img src="img/button_save.png" />
-        </button>
-        <div class="separator"></div>
-        <button id="insert-text" title="Insert text" disabled>
-          <img src="img/button_insert_text.png" />
-        </button>
-        <input
-          type="file"
-          accept="image/png, image/jpeg"
-          id="insert-image-input"
-          name="insert-image"
-          hidden
-        />
-        <button
-          id="insert-image"
-          onclick="document.getElementById('insert-image-input').click()"
-          title="Insert image"
-          disabled
-        >
-          <img src="img/button_insert_image.png" />
-        </button>
-        <div class="separator"></div>
-        <div id="nav-bar">
-          <button id="previous" title="Go to the previous page" disabled>
-            <img src="img/button_previous_page.png" />
+    <div id="top-bar">
+      <div id="toolbar">
+        <div id="toolbar-inner">
+          <input
+            type="file"
+            accept=".pdf"
+            id="pdf-file-input"
+            name="pdf_file"
+            hidden
+          />
+          <button
+            id="pdf-file"
+            onclick="document.getElementById('pdf-file-input').click()"
+            title="Choose a PDF file"
+          >
+            <img src="img/button_choose_pdf.png" />
           </button>
-          <input type="text" id="current-page" value="1" disabled /> /
-          <span id="total-pages"></span>
-          <button id="next" title="Go to the next page" disabled>
-            <img src="img/button_next_page.png" />
+          <button id="save" title="Save the PDF to disk" disabled>
+            <img src="img/button_save.png" />
+          </button>
+          <div class="separator"></div>
+          <button id="insert-text" title="Insert text" disabled>
+            <img src="img/button_insert_text.png" />
+          </button>
+          <input
+            type="file"
+            accept="image/png, image/jpeg"
+            id="insert-image-input"
+            name="insert-image"
+            hidden
+          />
+          <button
+            id="insert-image"
+            onclick="document.getElementById('insert-image-input').click()"
+            title="Insert image"
+            disabled
+          >
+            <img src="img/button_insert_image.png" />
+          </button>
+          <div class="separator"></div>
+          <div id="nav-bar">
+            <button id="previous" title="Go to the previous page" disabled>
+              <img src="img/button_previous_page.png" />
+            </button>
+            <input type="text" id="current-page" value="1" disabled /> /
+            <span id="total-pages"></span>
+            <button id="next" title="Go to the next page" disabled>
+              <img src="img/button_next_page.png" />
+            </button>
+          </div>
+          <div class="separator"></div>
+          <button id="rotate" title="Rotate clockwise" disabled>
+            <img src="img/button_rotate.png" />
           </button>
         </div>
-        <div class="separator"></div>
-        <button id="rotate" title="Rotate clockwise" disabled>
-          <img src="img/button_rotate.png" />
-        </button>
+      </div>
+      <div id="socials">
+        <a
+          href="https://github.com/photown/private-pdf"
+          target="_blank"
+          title="View source code on GitHub"
+        >
+          <img src="img/github.png" />
+        </a>
       </div>
     </div>
     <div id="flex-container">
