@@ -300,13 +300,17 @@ export class View {
   }
 
   public setOnPdfFileChosenListener(
+    canChoosePdfPrecheck: () => boolean,
     onPdfFileChosen: (pdfFile: File) => Promise<void>
   ) {
     const pdfInput = document.getElementById(
       "pdf-file-input"
     ) as HTMLInputElement;
-    pdfInput.onclick = function () {
+    pdfInput.onclick = function (e: Event) {
       pdfInput.value = "";
+      if (!canChoosePdfPrecheck()) {
+        e.preventDefault();
+      }
     };
     pdfInput.onchange = async function (ev: Event) {
       const input = ev.target as HTMLInputElement;

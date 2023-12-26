@@ -31,11 +31,18 @@ function onPageLoad() {
 
   parsePageUrl();
 
-  view.setOnPdfFileChosenListener(async function (pdfFile: File) {
+  view.setOnPdfFileChosenListener(
+    () => true,
+    async function (pdfFile: File) {
+      await loadPdfFromFile(pdfFile);
+    }
+  );
+
+  async function loadPdfFromFile(pdfFile: File) {
     await readFileAsArrayBuffer(pdfFile).then(function (fileData: ArrayBuffer) {
       loadPdf(pdfFile.name, fileData);
     });
-  });
+  }
 
   function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
@@ -154,6 +161,21 @@ function onPageLoad() {
     }
 
     view.enableNavButtons();
+
+    view.setOnPdfFileChosenListener(
+      function () {
+        const overlays: Overlays = extractOverlays();
+        return (
+          overlays.pagesOverlays.size == 0 ||
+          confirm(
+            "If you load another PDF, all changes in the current PDF will be lost. Are you sure?"
+          )
+        );
+      },
+      async function (pdfFile: File) {
+        await loadPdfFromFile(pdfFile);
+      }
+    );
 
     view.setOnNextClickedListener(function () {
       if (currentPage + 1 <= pdfDocument.getPageCount()) {
