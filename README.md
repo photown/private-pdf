@@ -1,8 +1,8 @@
 # PrivatePDF
 
-PrivatePDF is a free web tool that lets users make quick PDF edits from within their web browser, without uploading anything anywhere.
+PrivatePDF is a free web tool that lets you make quick PDF edits from within your web browser, without uploading anything anywhere.
 
-I created this tool to make it quick and easy to sign PDF contracts, without having to deal with installing programs and without worrying that my PDFs will get uploaded somewhere.
+I created this tool to make it quick and easy to sign PDF contracts, without having to deal with installing programs and without worrying that my PDFs will get uploaded to a third party.
 
 It supports the bare minimum for my most common usecases. It is not intended to be a full-featured PDF editor.
 
