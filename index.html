@@ -10,9 +10,10 @@
         --toolbar-height: 65px;
       }
       body {
-        background-color: #808080;
+        background-color: #87898b;
         margin: 0;
         padding: 0;
+        font-family: sans-serif;
       }
       #flex-container {
         display: flex;
@@ -25,10 +26,11 @@
       #pages {
         display: flex;
         min-width: 210px;
-        max-height: calc(100vh - var(--toolbar-height));
+        max-height: calc(100vh - var(--toolbar-height) - 30px);
         overflow-y: auto;
         flex-direction: column;
         align-items: center;
+        padding: 15px 0;
       }
       #content {
         max-height: calc(100vh - var(--toolbar-height));
@@ -38,15 +40,18 @@
       }
       #pages .thumbnail-list-label {
         text-align: center;
+        padding-top: 10px;
+        line-height: 1;
       }
       #pages .thumbnail-list-container {
-        padding: 25px;
+        padding: 25px 25px 12px;
         align-items: center;
         display: flex;
         flex-direction: column;
       }
       .thumbnail-list-container-selected {
-        background-color: #a6a6c7;
+        background-color: #8ab9db;
+        border-radius: 10px;
       }
       #pageContainer {
         margin-left: auto;
@@ -80,9 +85,12 @@
       #overlayContainer input[type="text"] {
         padding: 0px;
         margin: 0px;
+        border-radius: 5px;
       }
       #overlayContainer .text-options input[type="number"] {
         width: 36px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
       }
       #overlayContainer .draggable {
         padding: 5px;
@@ -103,16 +111,26 @@
         display: none;
       }
       #overlayContainer .draggable.unfocused input[type="text"] {
-        background-color: transparent;
-        border: 1px dashed black;
+        background-color: lightyellow;
+        border: 1px #e2e2ce7d solid;
       }
       #overlayContainer .draggable.focused input[type="text"] {
         background-color: white;
-        border: 1px solid black;
+        border: 1px solid #ccc;
+      }
+      #overlayContainer .draggable input[type="color"] {
+        background: #fff;
+        width: 24px;
+        border-radius: 5px;
+        height: 24px;
+        border: 1px solid #ccc;
       }
       #overlayContainer .img-container {
         display: flex;
         align-items: center;
+      }
+      #overlayContainer .options-delete {
+        cursor: pointer;
       }
 
       #overlayContainer .drag-handle {
@@ -138,7 +156,12 @@
       }
 
       #toolbar button {
-        margin: 0;
+        margin: 0 4px 0 1px;
+        border: 1px solid #ccc;
+        background: none;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 5px;
       }
       #toolbar button image {
         vertical-align: middle;
@@ -149,8 +172,16 @@
         display: inline-block;
       }
 
-      #current-page {
+      #nav-bar #current-page {
         width: 25px;
+        border-radius: 5px;
+        background: none;
+        border: 1px solid #ccc;
+        margin-right: 5px;
+      }
+
+      #nav-bar #total-pages {
+        margin: 0 5px;
       }
 
       #nav-bar {
@@ -168,6 +199,10 @@
         display: flex;
         justify-content: space-between;
         height: var(--toolbar-height);
+        background-color: #f9f9f9;
+        box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        position: relative;
       }
       #socials {
         display: flex;
