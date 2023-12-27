@@ -50,9 +50,12 @@ export class View {
     (document.getElementById("next") as HTMLElement).removeAttribute(
       "disabled"
     );
-    (document.getElementById("rotate") as HTMLElement).removeAttribute(
-      "disabled"
-    );
+    (
+      document.getElementById("rotate-clockwise") as HTMLElement
+    ).removeAttribute("disabled");
+    (
+      document.getElementById("rotate-counterclockwise") as HTMLElement
+    ).removeAttribute("disabled");
   }
 
   public disableNavButtons() {
@@ -84,10 +87,13 @@ export class View {
       "disabled",
       "true"
     );
-    (document.getElementById("rotate") as HTMLElement).setAttribute(
+    (document.getElementById("rotate-clockwise") as HTMLElement).setAttribute(
       "disabled",
       "true"
     );
+    (
+      document.getElementById("rotate-counterclockwise") as HTMLElement
+    ).setAttribute("disabled", "true");
   }
 
   public setOnNextClickedListener(onClickListener: () => void) {
@@ -135,9 +141,19 @@ export class View {
     );
   }
 
-  public setOnRotateClickListener(onRotateClickListener: () => Promise<void>) {
-    (document.getElementById("rotate") as HTMLElement).onclick =
+  public setOnRotateClockwiseClickListener(
+    onRotateClickListener: () => Promise<void>
+  ) {
+    (document.getElementById("rotate-clockwise") as HTMLElement).onclick =
       onRotateClickListener;
+  }
+
+  public setOnRotateCounterClockwiseClickListener(
+    onRotateClickListener: () => Promise<void>
+  ) {
+    (
+      document.getElementById("rotate-counterclockwise") as HTMLElement
+    ).onclick = onRotateClickListener;
   }
 
   public setOnCurrentPageFocusOutListener(

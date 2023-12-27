@@ -208,7 +208,7 @@ function onPageLoad() {
       }
     });
 
-    view.setOnRotateClickListener(async function () {
+    view.setOnRotateClockwiseClickListener(async function () {
       const formInputValues: FormInputValues = view.extractFormInputValues();
       const overlays: Overlays = extractOverlays();
 
@@ -225,6 +225,27 @@ function onPageLoad() {
         formInputValues,
         overlays,
         /* rotateBy = */ 90
+      );
+      loadPdf(fileName, savedBytes);
+    });
+
+    view.setOnRotateCounterClockwiseClickListener(async function () {
+      const formInputValues: FormInputValues = view.extractFormInputValues();
+      const overlays: Overlays = extractOverlays();
+
+      if (
+        overlays.pagesOverlays.size > 0 &&
+        !confirm(
+          "You won't be able to edit the text and/or images you've added after rotating the PDF. Proceed anyway?"
+        )
+      ) {
+        return;
+      }
+
+      const savedBytes = await pdfDocument.savePdf(
+        formInputValues,
+        overlays,
+        /* rotateBy = */ -90
       );
       loadPdf(fileName, savedBytes);
     });
