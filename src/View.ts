@@ -200,9 +200,13 @@ export class View {
         const newDraggable = draggables[draggables.length - 1] as HTMLElement;
         that.setupDraggable(newDraggable, draggables.length);
 
-        (
-          newDraggable.querySelector("input[type=text].text") as HTMLElement
-        ).addEventListener("input", function (event: Event) {
+        const textInput = newDraggable.querySelector(
+          "input[type=text].text"
+        ) as HTMLElement;
+        // Note that focusing scrolls the PDF page to the element
+        textInput.focus();
+
+        textInput.addEventListener("input", function (event: Event) {
           that.handleTextInputChange(event);
         });
         (
@@ -260,6 +264,8 @@ export class View {
       const draggables = document.querySelectorAll(".draggable");
       const newDraggable = draggables[draggables.length - 1] as HTMLElement;
       that.setupDraggable(newDraggable, draggables.length);
+      // Note that focusing scrolls the PDF page to the element
+      newDraggable.focus();
 
       var input = document.getElementById(
         "insert-image-input"
@@ -655,9 +661,6 @@ export class View {
     draggableElement.style.left = 50 + (numDraggables - 1) * 10 + "px";
     draggableElement.style.top =
       scrollTop + (50 + (numDraggables - 1) * 10) + "px";
-
-    // Note that focusing scrolls the PDF page to the element
-    draggableElement.focus();
 
     (draggableElement.querySelector(".options-delete") as HTMLElement).onclick =
       function () {
