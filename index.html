@@ -200,6 +200,11 @@
         align-items: center;
         justify-content: center;
       }
+      #empty-state-inner {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 15px;
+      }
       #top-bar {
         display: flex;
         justify-content: space-between;
@@ -383,7 +388,7 @@
       </div>
     </div>
     <div id="empty-state">
-      <div>
+      <div id="empty-state-inner">
         <a href="#" onclick="document.getElementById('pdf-file-input').click()"
           >Pick a PDF file to modify.</a
         >
