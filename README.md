@@ -37,7 +37,7 @@ This tool has mainly been tested on desktop Chrome on Windows 11.
 - Create your own signature within the tool
 - Ability to insert symbols
 - Ability to rearrange and insert pages
-- Improve UI
+- Support for non-latin characters
 
 ## Technologies used
 
