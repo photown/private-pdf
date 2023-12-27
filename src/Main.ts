@@ -165,8 +165,9 @@ function onPageLoad() {
     view.setOnPdfFileChosenListener(
       function () {
         const overlays: Overlays = extractOverlays();
+        const formValues = view.extractFormInputValues();
         return (
-          overlays.pagesOverlays.size == 0 ||
+          (overlays.pagesOverlays.size == 0 && formValues.isEmpty()) ||
           confirm(
             "If you load another PDF, all changes in the current PDF will be lost. Are you sure?"
           )

@@ -6,4 +6,14 @@ export class FormInputValues {
   public readonly optionNameToSelectedIndex: Map<string, number> = new Map();
   public readonly radioGroupNameToSelectedIndex: Map<string, number> =
     new Map();
+
+  public isEmpty(): boolean {
+    return (
+      this.textNameToValue.size == 0 &&
+      this.checkboxNameToValue.size == 0 &&
+      this.dropdownNameToSelectedIndex.size == 0 &&
+      this.optionNameToSelectedIndex.size == 0 &&
+      this.radioGroupNameToSelectedIndex.size == 0
+    );
+  }
 }
