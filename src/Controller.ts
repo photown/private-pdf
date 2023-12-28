@@ -482,14 +482,14 @@ export class Controller {
     const textInput = draggable.textInput;
     const pages = this.view.getAllPages();
     if (textInput) {
-      const pagesToIncludeImage = this.getPagesOverlappingOverlay(
+      const pagesToIncludeText = this.getPagesOverlappingOverlay(
         pages,
         draggable.draggableTopLeft,
         draggable.draggableBottomRight,
         pdfDocument.getPageCount()
       );
 
-      for (const pageNumber of pagesToIncludeImage) {
+      for (const pageNumber of pagesToIncludeText) {
         const pdfPage = pdfDocument.getCachedPage(pageNumber);
         if (pdfPage == null) {
           console.log(
@@ -512,8 +512,7 @@ export class Controller {
         // pdf-js requires the coordinates from the font baseline. Thus we need to
         // calculate it ourselves.
         textOverlay.transform.x =
-          (2 + offsetLeft + (2 + offsetLeft) / page.offsetWidth) *
-          originalToActualRatio;
+          (offsetLeft + offsetLeft / page.offsetWidth) * originalToActualRatio;
         const p1 =
           (0.5 *
             baselineRatio(draggable.fontFamily, fontSizePx) *
