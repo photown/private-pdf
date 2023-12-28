@@ -192,21 +192,21 @@ export class View {
             <input type="text" class="text" value="" size="20" />
             <div class="text-options focused">
               <div class="img-container drag-handle">
-                <img src="img/icon_drag.png" draggable="false" />
+                <img src="img/icon_drag.png" draggable="false" title="Drag text" />
               </div>
               <div class="separator"></div>
               <div class="img-container">
-                <img src="img/icon_font_size.png" />
+                <img src="img/icon_font_size.png" title="Change font size" />
               </div>
-              <input type="number" class="fontSize" min="8" max="96" value="14">
+              <input type="number" class="fontSize" min="8" max="96" value="14" title="Change font size">
               <div class="separator"></div>
               <div class="img-container">
-                <img src="img/icon_text_color.png" />
+                <img src="img/icon_text_color.png" title="Change text color" />
               </div>
-              <input type="color" class="fontColor">
+              <input type="color" class="fontColor" title="Change text color">
               <div class="separator"></div>
               <div class="img-container">
-                <button class="options-delete" style="background: url('img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+                <button class="options-delete" title="Delete this text" />
               </div>
             </div>
           </div>
@@ -262,16 +262,16 @@ export class View {
           <img class="image-wrapper" />
           <div class="text-options focused">
             <div class="img-container drag-handle">
-              <img src="img/icon_drag.png" draggable="false" />
+              <img src="img/icon_drag.png" draggable="false" title="Drag image" />
             </div>
             <div class="separator"></div>
             <div class="img-container">
-                <img src="img/icon_scale_image.png" />
+                <img src="img/icon_scale_image.png" title="Change image scale" />
               </div>
-            <input type="number" class="scale" min="1" value="100">
+            <input type="number" class="scale" min="1" value="100" title="Change image scale">
             <div class="separator"></div>
             <div class="img-container">
-              <button class="options-delete" style="background: url('img/icon_delete.png'); width: 20px; height: 20px; padding: 0; margin: 0; border: 0" />
+              <button class="options-delete" title="Delete this image" />
             </div>
           </div>
         </div>
