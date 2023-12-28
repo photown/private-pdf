@@ -9,10 +9,10 @@ import {
   rgb,
 } from "pdf-lib";
 
-import { FormInputValues } from "./FormInputValues";
-import { ImageType } from "./overlays/ImageOverlay";
-import { Overlays } from "./overlays/Overlays";
-import { PageOverlays } from "./overlays/PageOverlays";
+import { FormInputValues } from "../forms/FormInputValues";
+import { ImageType } from "../overlays/ImageOverlay";
+import { Overlays } from "../overlays/Overlays";
+import { PageOverlays } from "../overlays/PageOverlays";
 
 /** Helper which applies all changes made to a PDF and saves them into a new PDF. */
 export class PdfDocumentSaver {

@@ -1,6 +1,6 @@
-import { FormInputValues } from "./FormInputValues";
+import { FormInputValues } from "./forms/FormInputValues";
 import { ImageDraggableMetadata } from "./draggables/ImageDraggableMetadata";
-import { PdfPage } from "./PdfPage";
+import { PdfPage } from "./pdf/PdfPage";
 import { TextDraggableMetadata } from "./draggables/TextDraggableMetadata";
 
 /** View which is responsible for displaying the data from the controller. */

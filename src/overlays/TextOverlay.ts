@@ -1,5 +1,5 @@
-import { ColorUtils } from "../ColorUtils";
-import { RGB } from "../RGB";
+import { ColorUtils } from "../utils/ColorUtils";
+import { RGB } from "../utils/RGB";
 import { OverlayBase } from "./OverlayBase";
 
 /**

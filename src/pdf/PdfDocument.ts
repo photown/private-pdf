@@ -3,8 +3,8 @@ import { EventBus } from "pdfjs-dist/web/pdf_viewer";
 
 import { PdfPage } from "./PdfPage";
 import { PdfDocumentSaver } from "./PdfDocumentSaver";
-import { FormInputValues } from "./FormInputValues";
-import { Overlays } from "./overlays/Overlays";
+import { FormInputValues } from "../forms/FormInputValues";
+import { Overlays } from "../overlays/Overlays";
 
 /** Represents a PDF document, providing methods to load and save PDFs. */
 export class PdfDocument {
